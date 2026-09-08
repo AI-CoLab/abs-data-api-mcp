@@ -1,0 +1,300 @@
+{
+  "report": "ABS Data API — declared vs observed delta",
+  "generatedAt": "2026-09-08T08:35:27.737Z",
+  "runId": "delta-2026-09-08T08-35-27-736Z",
+  "method": "Declared metadata was read from the ABS structure endpoints. Observed availability was established by pulling data (detail=serieskeysonly is broken). Only empirically-confirmed series are treated as real; this report is the derived difference between the two.",
+  "totals": {
+    "flows": 1227,
+    "flowsProbed": 0,
+    "flowsWithData": 0,
+    "flowsEmpty": 0,
+    "declaredKeys": 14761557818,
+    "observedSeries": 0,
+    "overallDensity": null,
+    "endpointsChecked": 14,
+    "endpointsNonConforming": 6
+  },
+  "findingCounts": {
+    "byKind": {
+      "broken-endpoint": 2,
+      "spec-drift": 3,
+      "malformed-response": 1,
+      "uncategorised-flow": 2,
+      "test-artefact": 1,
+      "metadata-inconsistency": 1
+    },
+    "bySeverity": {
+      "major": 5,
+      "critical": 1,
+      "minor": 4
+    }
+  },
+  "endpointConformance": [
+    {
+      "label": "agency other than ABS",
+      "url": "https://data.api.abs.gov.au/rest/dataflow/SPC",
+      "documented_behaviour": "Spec exposes agencyId as a parameter, implying multiple agencies",
+      "http_status": 404,
+      "verdict": "missing",
+      "detail": "HTTP 404: Could not find requested structures",
+      "duration_ms": 157
+    },
+    {
+      "label": "agencyscheme",
+      "url": "https://data.api.abs.gov.au/rest/agencyscheme/ABS",
+      "documented_behaviour": "Spec lists agencyscheme as a valid structureType",
+      "http_status": 404,
+      "verdict": "missing",
+      "detail": "HTTP 404: Could not find requested structures",
+      "duration_ms": 1751
+    },
+    {
+      "label": "detail=serieskeysonly (CSV)",
+      "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/all?detail=serieskeysonly",
+      "documented_behaviour": "detail=serieskeysonly should enumerate every series key",
+      "http_status": 200,
+      "verdict": "broken",
+      "detail": "HTTP 200 but only 0 data row(s); header-only response",
+      "duration_ms": 36949
+    },
+    {
+      "label": "detail=serieskeysonly (JSON)",
+      "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/all?detail=serieskeysonly",
+      "documented_behaviour": "Spec lists detail=serieskeysonly: series keys without observations",
+      "http_status": 200,
+      "verdict": "malformed",
+      "detail": "HTTP 200 but body is not valid JSON (SyntaxError: Unexpected non-whitespace character after JSON at position 42742 (l); tail: \"er and the unit of measure.\\\"}}],\\\"dataSets\\\":[0]}]}\\\"errors\\\":[]\"",
+      "duration_ms": 44
+    },
+    {
+      "label": "documented /structures/ path",
+      "url": "https://data.api.abs.gov.au/rest/structures/dataflow/ABS/CPI",
+      "documented_behaviour": "User guide documents /structures/{structureType}/{agencyId}/{structureId}",
+      "http_status": 400,
+      "verdict": "broken",
+      "detail": "HTTP 400: Invalid structure: structures",
+      "duration_ms": 49
+    },
+    {
+      "label": "hierarchicalcodelist",
+      "url": "https://data.api.abs.gov.au/rest/hierarchicalcodelist/ABS",
+      "documented_behaviour": "Spec lists hierarchicalcodelist as a valid structureType",
+      "http_status": 404,
+      "verdict": "missing",
+      "detail": "HTTP 404: Could not find requested structures",
+      "duration_ms": 202
+    },
+    {
+      "label": "actualconstraint",
+      "url": "https://data.api.abs.gov.au/rest/actualconstraint/ABS",
+      "documented_behaviour": "Spec lists actualconstraint as a valid structureType",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "HTTP 200, valid JSON",
+      "duration_ms": 772
+    },
+    {
+      "label": "availableconstraint",
+      "url": "https://data.api.abs.gov.au/rest/availableconstraint/CPI/all/ABS",
+      "documented_behaviour": "SDMX-REST defines availableconstraint for actual data availability",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "HTTP 200, valid JSON",
+      "duration_ms": 43
+    },
+    {
+      "label": "bulk contentconstraint",
+      "url": "https://data.api.abs.gov.au/rest/contentconstraint/ABS",
+      "documented_behaviour": "Spec: GET /contentconstraint/ABS returns all content constraints",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "data.contentConstraints: 2433 items",
+      "duration_ms": 772
+    },
+    {
+      "label": "bulk datastructure",
+      "url": "https://data.api.abs.gov.au/rest/datastructure/ABS",
+      "documented_behaviour": "Spec: GET /datastructure/ABS returns all data structures",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "data.dataStructures: 1229 items",
+      "duration_ms": 69
+    },
+    {
+      "label": "categoryscheme with references",
+      "url": "https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings",
+      "documented_behaviour": "Spec lists references=parentsandsiblings as a valid value",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "data.categorySchemes: 25 items",
+      "duration_ms": 71
+    },
+    {
+      "label": "dataflow listing",
+      "url": "https://data.api.abs.gov.au/rest/dataflow/ABS?detail=allstubs",
+      "documented_behaviour": "Spec: GET /{structureType}/{agencyId} returns all structures of a type",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "data.dataflows: 1227 items",
+      "duration_ms": 95
+    },
+    {
+      "label": "firstNObservations (absent from spec)",
+      "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/1.10001.10.50.Q?firstNObservations=1",
+      "documented_behaviour": "Added 2024-11-29 per the user guide; absent from the OpenAPI enum",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "1 data row(s)",
+      "duration_ms": 37
+    },
+    {
+      "label": "lastNObservations (absent from spec)",
+      "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/1.10001.10.50.Q?lastNObservations=1",
+      "documented_behaviour": "Added 2024-11-29 per the user guide; absent from the OpenAPI enum",
+      "http_status": 200,
+      "verdict": "conforms",
+      "detail": "1 data row(s)",
+      "duration_ms": 42
+    }
+  ],
+  "findings": [
+    {
+      "kind": "malformed-response",
+      "severity": "critical",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "detail=serieskeysonly (JSON): malformed — HTTP 200 but body is not valid JSON (SyntaxError: Unexpected non-whitespace character after JSON at position 42742 (l); tail: \"er and the unit of measure.\\\"}}],\\\"dataSets\\\":[0]}]}\\\"errors\\\":[]\"",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/all?detail=serieskeysonly",
+        "documented": "Spec lists detail=serieskeysonly: series keys without observations",
+        "httpStatus": 200,
+        "verdict": "malformed"
+      }
+    },
+    {
+      "kind": "broken-endpoint",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "documented /structures/ path: broken — HTTP 400: Invalid structure: structures",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/structures/dataflow/ABS/CPI",
+        "documented": "User guide documents /structures/{structureType}/{agencyId}/{structureId}",
+        "httpStatus": 400,
+        "verdict": "broken"
+      }
+    },
+    {
+      "kind": "broken-endpoint",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "detail=serieskeysonly (CSV): broken — HTTP 200 but only 0 data row(s); header-only response",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/all?detail=serieskeysonly",
+        "documented": "detail=serieskeysonly should enumerate every series key",
+        "httpStatus": 200,
+        "verdict": "broken"
+      }
+    },
+    {
+      "kind": "spec-drift",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "agencyscheme: missing — HTTP 404: Could not find requested structures",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/agencyscheme/ABS",
+        "documented": "Spec lists agencyscheme as a valid structureType",
+        "httpStatus": 404,
+        "verdict": "missing"
+      }
+    },
+    {
+      "kind": "spec-drift",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "hierarchicalcodelist: missing — HTTP 404: Could not find requested structures",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/hierarchicalcodelist/ABS",
+        "documented": "Spec lists hierarchicalcodelist as a valid structureType",
+        "httpStatus": 404,
+        "verdict": "missing"
+      }
+    },
+    {
+      "kind": "spec-drift",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "agency other than ABS: missing — HTTP 404: Could not find requested structures",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/dataflow/SPC",
+        "documented": "Spec exposes agencyId as a parameter, implying multiple agencies",
+        "httpStatus": 404,
+        "verdict": "missing"
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "Code annotation type casing is inconsistent upstream: both ORDER and order are emitted",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "note": "normalised to upper case on ingest; consumers matching case-sensitively will miss some"
+      }
+    },
+    {
+      "kind": "test-artefact",
+      "severity": "minor",
+      "flowId": "TEST",
+      "dimensionId": null,
+      "summary": "TEST: test fixture published in the production dataflow listing",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "name": "Test Dataflow"
+      }
+    },
+    {
+      "kind": "uncategorised-flow",
+      "severity": "minor",
+      "flowId": "BA_SA2_201116",
+      "dimensionId": null,
+      "summary": "BA_SA2_201116: present in the dataflow listing but absent from every category scheme",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "note": "not discoverable by topic browsing"
+      }
+    },
+    {
+      "kind": "uncategorised-flow",
+      "severity": "minor",
+      "flowId": "TEST",
+      "dimensionId": null,
+      "summary": "TEST: present in the dataflow listing but absent from every category scheme",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "note": "not discoverable by topic browsing"
+      }
+    }
+  ]
+}

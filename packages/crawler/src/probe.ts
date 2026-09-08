@@ -165,6 +165,41 @@ function splitCandidates(db: CatalogueDb, flowId: string, dim: FlowDimension): s
     .map((r) => r.codeId);
 }
 
+/** Fan-out bounds per split level: enough chunks to get under the timeout,
+ *  few enough that we do not issue thousands of requests for one flow. */
+const SPLIT_MIN_FANOUT = 8;
+const SPLIT_MAX_FANOUT = 64;
+
+/**
+ * Picks which dimension to split on.
+ *
+ * Splitting on the highest-cardinality dimension minimises chunk size but is
+ * badly wasteful: `ABS_C16_T07_SA`'s geography codelist has 4,302 codes, so that
+ * choice would issue 4,302 requests where ~30 would do. Instead prefer the
+ * smallest dimension that still yields a useful number of chunks, and only fall
+ * back to the largest when nothing is in range.
+ */
+export function chooseSplitDimension<D>(
+  candidates: ReadonlyArray<{ dim: D; codes: string[] }>,
+): { dim: D; codes: string[] } | undefined {
+  const usable = candidates.filter((c) => c.codes.length >= 2);
+  if (usable.length === 0) return undefined;
+
+  const inRange = usable
+    .filter((c) => c.codes.length >= SPLIT_MIN_FANOUT && c.codes.length <= SPLIT_MAX_FANOUT)
+    .sort((a, b) => b.codes.length - a.codes.length);
+  if (inRange[0]) return inRange[0];
+
+  // Nothing in range: prefer the smallest above the ceiling (fewest requests
+  // that still splits meaningfully), else the largest below the floor.
+  const aboveCeiling = usable
+    .filter((c) => c.codes.length > SPLIT_MAX_FANOUT)
+    .sort((a, b) => a.codes.length - b.codes.length);
+  if (aboveCeiling[0]) return aboveCeiling[0];
+
+  return [...usable].sort((a, b) => b.codes.length - a.codes.length)[0];
+}
+
 /** Builds an SDMX dataKey: codes in dimension order, empty segment = wildcard. */
 export function buildDataKey(
   dimensions: readonly FlowDimension[],
@@ -370,12 +405,9 @@ export async function probeFlow(deps: ProbeDeps, flowId: string): Promise<FlowPr
       return;
     }
 
-    let best: { dim: FlowDimension; codes: string[] } | undefined;
-    for (const dim of remaining) {
-      const codes = splitCandidates(deps.db, flowId, dim);
-      if (codes.length < 2) continue;
-      if (!best || codes.length > best.codes.length) best = { dim, codes };
-    }
+    const best = chooseSplitDimension(
+      remaining.map((dim) => ({ dim, codes: splitCandidates(deps.db, flowId, dim) })),
+    );
 
     if (!best) {
       exhaustedSplits = true;
