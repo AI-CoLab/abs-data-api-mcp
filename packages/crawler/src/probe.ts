@@ -397,6 +397,14 @@ export async function probeFlow(
     .onConflictDoNothing()
     .run();
 
+  // Observed marginals accumulate (series_count + excluded.series_count) so
+  // that recursive splits sum correctly within one probe. That makes a re-probe
+  // double-count, so the flow's marginals are cleared first. Matters for the
+  // monthly refresh as much as for a forced re-run.
+  deps.sqlite
+    .prepare(`DELETE FROM observed_dimension_code WHERE flow_id = ?`)
+    .run(flowId);
+
   const writer = new SeriesWriter(deps.sqlite, {
     flowId,
     runId: deps.runId,

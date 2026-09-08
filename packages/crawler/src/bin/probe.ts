@@ -68,7 +68,32 @@ const deps: ProbeDeps = {
   passTimeoutMs: Number(process.env["ABS_PASS_TIMEOUT_MS"] ?? 110_000),
 };
 
+/**
+ * Index management, not data: the lookup index over series_key_value is dropped
+ * for the duration of a bulk run and rebuilt afterwards. Maintaining a
+ * low-cardinality secondary index across hundreds of millions of inserts costs
+ * far more than one rebuild. The rows themselves are written exactly as the
+ * probe parses them from the API's own per-dimension CSV columns.
+ */
+const buildingKeyValues = keyValueFlows !== undefined;
+
+function dropKeyValueIndex(): void {
+  rt.sqlite.exec(`DROP INDEX IF EXISTS series_key_value_lookup_idx`);
+  rt.log("dropped series_key_value_lookup_idx for the duration of this run");
+}
+
+function rebuildKeyValueIndex(): void {
+  const started = Date.now();
+  rt.sqlite.exec(
+    `CREATE INDEX IF NOT EXISTS series_key_value_lookup_idx
+     ON series_key_value (dimension_id, code_id)`,
+  );
+  rt.log(`rebuilt series_key_value_lookup_idx in ${((Date.now() - started) / 1000).toFixed(1)}s`);
+}
+
 try {
+  if (buildingKeyValues) dropKeyValueIndex();
+
   openProbeRun(
     deps,
     JSON.stringify({ force, keyValueFlows: [...(keyValueFlows ?? [])], limit, named }),
@@ -169,5 +194,14 @@ try {
   rt.log(`series observed: ${seriesTotal}`);
   rt.log(`http: ${JSON.stringify(rt.client.stats)}`);
 } finally {
+  // Rebuild even on interruption, so the database is never left without the
+  // index that queries depend on.
+  if (buildingKeyValues) {
+    try {
+      rebuildKeyValueIndex();
+    } catch (err) {
+      rt.log(`WARNING: index rebuild failed: ${String(err)} — re-run to restore it`);
+    }
+  }
   rt.sqlite.close();
 }

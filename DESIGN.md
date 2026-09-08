@@ -238,12 +238,42 @@ and for ANZSCO occupations `SKILL_LEVEL`, `INDICATIVE_SKILL_LEVEL`,
    then answer existence questions exactly and never emit a query that returns
    `NoRecordsFound`.
 7a. **Storage encoding is deliberately deferred.** Build the clean normalised
-   relational model against **local SQLite** first. Revised estimate is 20–100M
-   series; a normalised key-value table at ~6 rows per series is 150–600M rows
-   and would exceed D1's 10GB ceiling. That is an **optimisation to solve once
-   everything before it works** — options at that point include packed key
-   strings plus observed marginals, sharding across D1 databases, or compressed
-   key sets in R2. Do not let it block the pre-deployment work.
+   relational model against **local SQLite** first. A normalised key-value table
+   at ~6 rows per series would exceed D1's 10GB ceiling. That is an
+   **optimisation to solve once everything before it works** — options at that
+   point include packed key strings plus observed marginals, sharding across D1
+   databases, or compressed key sets in R2. Do not let it block the
+   pre-deployment work. Note that `availableconstraint` (section 2.8) has since
+   made the D1 side of this largely moot: the front door validates keys live.
+
+7b. **Store every observed key, and build the per-dimension index for all
+   flows.** Reaffirmed after the real numbers came in: measured average is 8,543
+   series per flow, so the corpus is tens of millions of series. Both
+   `series` (one row per series) and `series_key_value` (~6 rows per series,
+   hundreds of millions) are built corpus-wide in the local SQLite build.
+
+   `series_key_value` carries **no information** that `series.key_string` lacks
+   — verified that no ABS code contains the `.` separator, so a key string
+   splits back to exactly the same tuple. Its sole purpose is indexing: a
+   dimension sits at a different key position in every flow, so no index over
+   `key_string` can serve a predicate like `REGION=1GSYD`, whereas
+   `(dimension_id, code_id)` can.
+
+   Because the decomposition is derivable, it is **backfilled offline** from
+   `series` plus `declared_dimension` rather than requiring a re-crawl.
+
+### 3a. Provisional, NOT settled
+
+**Observation counts are derived, and this is a stopgap.** A two-pass probe
+(`firstNObservations=1` + `lastNObservations=1`) yields exact first and last
+periods but not true observation counts. `series.derived_obs_count` is computed
+from frequency and extent: exact for gap-free series, an upper bound where gaps
+exist. `series.actual_obs_count` is deliberately left NULL.
+
+This was accepted **for now only, and explicitly not endorsed as the final
+answer.** It must not be cited later as a settled decision. Getting true counts
+and gap detection requires pulling full history, which is the
+hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
 8. **Codelists:** keep everything, normalised. Codes with `parent`, plus all
    annotations in a typed key-value table.
 9. **Hierarchy:** adjacency list **plus a closure table** of ancestor-descendant
