@@ -406,10 +406,14 @@ hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
     have compressible structure (census families landing at exactly 1/9
     density suggest rule-shaped sparsity), exact static types MAY be generated
     for those tables; measured from the key set, never assumed.
-22. **Abuse protection: cache-first, no rate limiter.** Aggressive use of the
-    Cache API and D1 read caching so abuse is cheap rather than blocked. Chosen
-    deliberately in favour of legitimate users; accepts that there is no hard
-    ceiling on cost.
+22. **Abuse protection: cache-first now, rate limiting last.** Aggressive use
+    of the Cache API and D1 read caching so read abuse is cheap rather than
+    blocked. **Amended 2026-09-08:** rate limiting WILL be added, as the final
+    step once the system is fully functional — not before. The read surface may
+    stay generous; the Code Mode `execute` tool is a different risk class
+    (strangers running compute on our account) and is the primary reason a
+    limiter is required at the end. Per-execution budgets (wall-clock, CPU,
+    subrequests, output size) apply from the day that tool ships regardless.
 23. **Repo layout: pnpm workspace, four packages.**
     - `packages/schema` — Drizzle + Zod, the shared source of truth
     - `packages/crawler` — structural crawl and observed probe
@@ -417,10 +421,15 @@ hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
     - `packages/worker` — MCP front door
     Keeps boundaries clean and stops the Worker bundling crawler code.
 
-## 4. Resolved
+## 4. Destination
 
-Rate limiting was the one open recommendation; settled by decision 22
-(cache-first, no limiter).
+The agreed end-state (2026-09-08): one contract generated from the observed
+catalogue per crawl, with five derived surfaces — fixed-verb MCP door, Code Mode
+MCP flavour (search over the corrected spec + sandboxed execute against the
+validated client), HTTP/OpenAPI door with Scalar docs, Cap'n Web TypeScript SDK,
+and the browsable artifact. Sequencing: cartography completes first, then core
+doors, then SDK + Code Mode, then rate limiting as the final step (decision 22,
+amended).
 
 ## 5. Provisional schema sketch
 
