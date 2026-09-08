@@ -322,12 +322,44 @@ function seriesFromRow(row: string[], plan: HeaderPlan): ObservedSeries {
   };
 }
 
+export interface ProbeTarget {
+  id: string;
+  agencyId: string;
+  version: string;
+  name: string | null;
+}
+
 /**
  * Probes one flow to completion, splitting when a whole-flow pass times out.
+ *
+ * The canonical `observed_flow` row is created before any series are written,
+ * because `series` and `observed_dimension_code` both reference it. It starts
+ * at zero series and ineligible, and is only promoted once data is confirmed —
+ * so an interrupted probe leaves a flow marked as serving nothing rather than
+ * as silently available.
  */
-export async function probeFlow(deps: ProbeDeps, flowId: string): Promise<FlowProbeResult> {
+export async function probeFlow(
+  deps: ProbeDeps,
+  target: ProbeTarget,
+): Promise<FlowProbeResult> {
   const started = performance.now();
+  const flowId = target.id;
   const dimensions = flowDimensions(deps.db, flowId);
+
+  deps.db
+    .insert(observedFlow)
+    .values({
+      id: target.id,
+      agencyId: target.agencyId,
+      version: target.version,
+      name: target.name,
+      seriesCount: 0,
+      mcpEligible: false,
+      lastProbedAt: new Date().toISOString(),
+    })
+    .onConflictDoNothing()
+    .run();
+
   const writer = new SeriesWriter(deps.sqlite, {
     flowId,
     runId: deps.runId,

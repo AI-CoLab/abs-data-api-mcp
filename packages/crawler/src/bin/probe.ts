@@ -62,6 +62,12 @@ try {
           .map((r) => r.flowId),
       );
 
+  // Smallest declared key space first. Alphabetical order would front-load the
+  // ABS_C16_*/ABS_C21_* census blocks, which are the largest flows in the
+  // corpus and need recursive splitting — hours of work before any flow
+  // completes. Cheapest-first banks the tractable majority early, and since the
+  // crawl is resumable that is also the most useful thing to have on disk if it
+  // is interrupted.
   let flows = rt.db
     .select({
       id: declaredFlow.id,
@@ -71,7 +77,7 @@ try {
       declaredKeyCount: declaredFlow.declaredKeyCount,
     })
     .from(declaredFlow)
-    .orderBy(asc(declaredFlow.id))
+    .orderBy(asc(declaredFlow.declaredKeyCount), asc(declaredFlow.id))
     .all();
 
   if (named.length > 0) flows = flows.filter((f) => named.includes(f.id));
@@ -100,7 +106,12 @@ try {
       const flow = queue.shift();
       if (!flow) return;
 
-      const result = await probeFlow(deps, flow.id);
+      const result = await probeFlow(deps, {
+        id: flow.id,
+        agencyId: flow.agencyId,
+        version: flow.version,
+        name: flow.name,
+      });
       recordFlowProbe(deps, flow, result, flow.declaredKeyCount ?? null);
       if (result.seriesFound > 0) fillDerivedObsCounts(rt.sqlite, flow.id);
 

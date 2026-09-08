@@ -109,13 +109,42 @@ export async function measureCorpus(deps: SizingDeps): Promise<SizingSummary> {
   const concurrency = deps.concurrency ?? 8;
   let done = 0;
 
+  /** Flush as we go: a run over 1,227 flows takes long enough to be
+   *  interrupted, and deferring every write to the end loses all of it. */
+  let pending: FlowSize[] = [];
+  const flush = (): void => {
+    if (pending.length === 0) return;
+    const batch = pending;
+    pending = [];
+    const now = new Date().toISOString();
+    deps.db.transaction((tx) => {
+      for (const r of batch) {
+        tx.insert(flowPayloadSize)
+          .values({
+            flowId: r.flowId,
+            runId: deps.runId,
+            pass,
+            httpStatus: r.httpStatus ?? null,
+            totalBytes: r.totalBytes ?? null,
+            estimatedSeries: r.estimatedSeries ?? null,
+            durationMs: r.durationMs,
+            measuredAt: now,
+          })
+          .onConflictDoNothing()
+          .run();
+      }
+    });
+  };
+
   const workers = Array.from({ length: concurrency }, async () => {
     for (;;) {
       const flowId = queue.shift();
       if (!flowId) return;
       const size = await measureFlow(deps.client, flowId, pass, deps.timeoutMs ?? 20_000);
       results.push(size);
+      pending.push(size);
       done += 1;
+      if (pending.length >= 25) flush();
       if (done % 100 === 0 || done === flows.length) {
         const soFar = results.reduce((n, r) => n + (r.totalBytes ?? 0), 0);
         deps.log(`  ${done}/${flows.length} measured, ${(soFar / 1e9).toFixed(2)}GB so far`);
@@ -123,25 +152,7 @@ export async function measureCorpus(deps: SizingDeps): Promise<SizingSummary> {
     }
   });
   await Promise.all(workers);
-
-  const now = new Date().toISOString();
-  deps.db.transaction((tx) => {
-    for (const r of results) {
-      tx.insert(flowPayloadSize)
-        .values({
-          flowId: r.flowId,
-          runId: deps.runId,
-          pass,
-          httpStatus: r.httpStatus ?? null,
-          totalBytes: r.totalBytes ?? null,
-          estimatedSeries: r.estimatedSeries ?? null,
-          durationMs: r.durationMs,
-          measuredAt: now,
-        })
-        .onConflictDoNothing()
-        .run();
-    }
-  });
+  flush();
 
   const ok = results.filter((r) => r.httpStatus === 200 || r.httpStatus === 206);
   return {
