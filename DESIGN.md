@@ -336,8 +336,55 @@ hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
     D1 holds catalogue and validation metadata only; observations are fetched
     from ABS at call time. Deployed **public and unauthenticated**, mirroring the
     upstream API.
-21. **MCP tool surface:** deferred until cartography is complete, then designed
-    from what the data actually looks like.
+21. **MCP tool surface — architecture settled 2026-09-08** (specific tool
+    signatures still finalised against the finished probe):
+
+    **Single source, derived doors.** The precedent is Cloudflare's own API:
+    ~2,500 endpoints exposed over MCP as just two fixed tools (search +
+    execute) reading the OpenAPI spec — the spec is the surface, the doors
+    never change. Our equivalent single source is the **observed catalogue**;
+    each crawl regenerates one contract artifact from it (Zod schemas, the
+    corrected OpenAPI document, the D1 data). Every door either reads that
+    artifact at runtime or is mechanically rendered from it. **No door
+    hardcodes the surface, so nothing is manually kept in alignment.**
+
+    - **MCP door:** a fixed set of generic verbs (search tables / describe
+      table / get data) that query the catalogue at runtime; invalid or
+      ambiguous selections answered with MRTR `input_required` carrying the
+      observed valid options. Built on MCP spec 2026-07-28 (fully stateless,
+      no sessions) via MCP TypeScript SDK v2 + `createMcpHandler` — a plain
+      Worker, no Durable Objects. `tools/list` and describe responses served
+      with `ttlMs`/`cacheScope: public` and deterministic ordering (decision
+      22, cache-first). Per-table generated "headliner" tools are dropped:
+      they were the only component carrying a manual-alignment burden.
+    - **Calling verbs:** named selections (`{table, select: {REGION:
+      "Melbourne", ...}}`), labels or codes in, server resolves and validates
+      against the observed store. Validated selections may be returned as
+      self-contained signed tokens (capability-style handles per the 2026
+      spec's stateless-handle guidance) so later calls skip re-validation.
+    - **HTTP/OpenAPI door:** chanfana (Cloudflare's Zod v4 OpenAPI 3.1
+      generator/validator, Workers-first) or oRPC — routes generated from the
+      contract, spec emitted from the same Zod. The emitted **corrected
+      OpenAPI document is itself a cartography deliverable**, to sit beside
+      ABS's inaccurate published spec in the defect report.
+    - **Docs door:** Scalar renders the emitted spec. Scalar's hosted
+      OpenAPI-to-MCP generation is noted and rejected for the MCP door itself
+      (it cannot express observed-constrained options or MRTR narrowing).
+    - **Optional later doors, same contract:** a Cap'n Web `RpcTarget` as the
+      TypeScript SDK (pipelined validate-and-fetch in one round trip; no
+      OpenAPI story, so it complements rather than replaces the HTTP door),
+      and a Code Mode-style search+execute MCP flavour over the corrected
+      spec.
+    - **Cloudflare Agents SDK:** used only for `createMcpHandler`. The rest of
+      it is a stateful-agent runtime, which this deliberately stateless front
+      door does not want.
+
+    Combination validity remains runtime truth from the observed store
+    (decision 7): no static schema can carry 300M+ arbitrary combinations —
+    the schema would be the database. Where the observed key set proves to
+    have compressible structure (census families landing at exactly 1/9
+    density suggest rule-shaped sparsity), exact static types MAY be generated
+    for those tables; measured from the key set, never assumed.
 22. **Abuse protection: cache-first, no rate limiter.** Aggressive use of the
     Cache API and D1 read caching so abuse is cheap rather than blocked. Chosen
     deliberately in favour of legitimate users; accepts that there is no hard
