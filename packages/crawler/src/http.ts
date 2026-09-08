@@ -66,7 +66,7 @@ export class AbsHttpError extends Error {
 }
 
 /** Minimal counting semaphore; keeps concurrency at the measured sweet spot. */
-class Semaphore {
+export class Semaphore {
   private active = 0;
   private readonly waiting: Array<() => void> = [];
 

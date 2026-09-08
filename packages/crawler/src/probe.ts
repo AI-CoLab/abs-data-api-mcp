@@ -28,7 +28,7 @@ import {
   observedFlow,
   probeRun,
 } from "@abs/schema";
-import { AbsClient, ACCEPT, AbsHttpError } from "./http.ts";
+import { AbsClient, ACCEPT, AbsHttpError, Semaphore } from "./http.ts";
 import { archiveKey, teeBody, type RawArchive } from "./archive.ts";
 import { readCsvTable } from "./csv.ts";
 import { SeriesWriter, type ObservedSeries } from "./writer.ts";
@@ -56,6 +56,15 @@ export interface ProbeDeps {
   keyValueFlows?: ReadonlySet<string> | undefined;
   /** Give up splitting beyond this depth and record the flow as partial. */
   maxSplitDepth?: number;
+  /**
+   * In-flight split slices per flow, across all recursion depths. Slices are
+   * disjoint key subspaces, so they parallelise safely; without this the
+   * recursion was strictly sequential, which put hours of dead timeout-waiting
+   * on the largest flows exactly where total parallelism had collapsed to one.
+   * A single per-flow gate (not per recursion level) keeps deep recursion from
+   * multiplying concurrent response streams.
+   */
+  sliceConcurrency?: number;
   /** Shorter than the 120s gateway limit, so a split is tried sooner. */
   passTimeoutMs?: number;
 }
@@ -430,6 +439,7 @@ export async function probeFlow(
 
   const seenKeys = new Set<string>();
   const streamErrors: string[] = [];
+  const sliceGate = new Semaphore(deps.sliceConcurrency ?? 6);
   let sawTimeout = false;
   let exhaustedSplits = false;
 
@@ -501,13 +511,28 @@ export async function probeFlow(
       `    ${flowId}: splitting on ${best.dim.dimensionId} (${best.codes.length} codes) at depth ${depth}`,
     );
 
-    for (const codeId of best.codes) {
-      const next = new Map(assignments);
-      next.set(best.dim.dimensionId, codeId);
-      const key = buildDataKey(dimensions, next);
-      const ok = await lastPass(key, `last-d${depth}-${best.dim.dimensionId}-${codeId}`, depth);
-      if (!ok) await splitAndProbe(next, depth + 1);
-    }
+    // Slices are disjoint key subspaces — parallel-safe. The gate is shared
+    // across recursion depths so nested splits cannot multiply concurrent
+    // streams; parents awaiting children hold no slot. Shared state touched
+    // from concurrent slices (seenKeys, the writer's batches, result counters)
+    // is only ever mutated synchronously between awaits, so the single-threaded
+    // event loop keeps it consistent.
+    await Promise.all(
+      best.codes.map(async (codeId) => {
+        const next = new Map(assignments);
+        next.set(best.dim.dimensionId, codeId);
+        const key = buildDataKey(dimensions, next);
+
+        const release = await sliceGate.acquire();
+        let ok: boolean;
+        try {
+          ok = await lastPass(key, `last-d${depth}-${best.dim.dimensionId}-${codeId}`, depth);
+        } finally {
+          release();
+        }
+        if (!ok) await splitAndProbe(next, depth + 1);
+      }),
+    );
   };
 
   try {
