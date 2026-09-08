@@ -370,11 +370,32 @@ hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
     - **Docs door:** Scalar renders the emitted spec. Scalar's hosted
       OpenAPI-to-MCP generation is noted and rejected for the MCP door itself
       (it cannot express observed-constrained options or MRTR narrowing).
-    - **Optional later doors, same contract:** a Cap'n Web `RpcTarget` as the
-      TypeScript SDK (pipelined validate-and-fetch in one round trip; no
-      OpenAPI story, so it complements rather than replaces the HTTP door),
-      and a Code Mode-style search+execute MCP flavour over the corrected
-      spec.
+    - **Planned later doors, same contract (committed 2026-09-08; sequenced
+      after the core doors ship):**
+      1. A Cap'n Web `RpcTarget` as the TypeScript SDK — pipelined
+         validate-and-fetch in one round trip; no OpenAPI story, so it
+         complements rather than replaces the HTTP door.
+      2. A **Code Mode** flavour on the same MCP server, per Cloudflare's
+         production pattern (their API: 2,500 endpoints as two tools, ~244K
+         tokens of schemas collapsed to ~1K): a `search` tool where the model
+         writes JS queries against our **corrected, pre-resolved OpenAPI
+         spec** in a no-network isolate, and an `execute` tool running
+         model-written JS in a fresh Worker Loader isolate whose only
+         capability is our contract-validated client — `globalOutbound`
+         pinned to our Worker, credentials in props, never inside the
+         isolate. Especially apt for a statistics API: multi-series
+         analytical work happens inside the sandbox and only computed results
+         reach model context, so megabyte data payloads never occupy it.
+         Observed-only is preserved because the injected client is the same
+         validated core; invalid combinations throw typed errors the model
+         fixes in code.
+
+      These converge on one artifact: the sandbox's injected client and the
+      Cap'n Web SDK are the same contract-generated typed client. One
+      generator output, three consumers (developers, model-written code, our
+      own UI). Classic fixed verbs remain alongside — per Cloudflare's own
+      guidance, explicit tools win for frequent fixed lookups, Code Mode for
+      broad coverage and analytical composition.
     - **Cloudflare Agents SDK:** used only for `createMcpHandler`. The rest of
       it is a stateful-agent runtime, which this deliberately stateless front
       door does not want.
