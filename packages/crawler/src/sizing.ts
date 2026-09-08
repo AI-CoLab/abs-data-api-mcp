@@ -25,6 +25,8 @@ export interface SizingDeps {
   log: (msg: string) => void;
   pass?: "last" | "first" | "full";
   concurrency?: number;
+  /** Per-flow budget; exceeding it marks the flow as needing a split. */
+  timeoutMs?: number;
 }
 
 export interface FlowSize {
@@ -40,6 +42,7 @@ export async function measureFlow(
   client: AbsClient,
   flowId: string,
   pass: "last" | "first" | "full",
+  timeoutMs = 20_000,
 ): Promise<FlowSize> {
   const started = performance.now();
   const query: Record<string, string | number> = {};
@@ -47,12 +50,16 @@ export async function measureFlow(
   if (pass === "first") query["firstNObservations"] = 1;
 
   try {
+    // A short timeout is deliberate. The server must generate the whole response
+    // to report its length, and the largest census flows cannot do that even in
+    // 145s. A flow that cannot be sized quickly is a flow that needs splitting,
+    // so the timeout is the signal rather than a failure worth waiting out.
     const res = await client.request({
       path: `data/ABS,${encodeURIComponent(flowId)}/all`,
       accept: ACCEPT.dataCsv,
       query,
       range: { start: 0, end: 0 },
-      timeoutMs: 115_000,
+      timeoutMs,
     });
     await res.body?.cancel();
 
@@ -106,7 +113,7 @@ export async function measureCorpus(deps: SizingDeps): Promise<SizingSummary> {
     for (;;) {
       const flowId = queue.shift();
       if (!flowId) return;
-      const size = await measureFlow(deps.client, flowId, pass);
+      const size = await measureFlow(deps.client, flowId, pass, deps.timeoutMs ?? 20_000);
       results.push(size);
       done += 1;
       if (done % 100 === 0 || done === flows.length) {

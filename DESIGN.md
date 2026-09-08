@@ -63,22 +63,42 @@ boilerplate.
 
 ### 2.3 Documentation and specification defects
 
-The user guide and the OpenAPI spec both diverge from reality.
+The user guide and the OpenAPI spec both diverge from reality. Verified by the
+automated conformance suite (`packages/crawler/src/endpoints.ts`), which records
+the documented claim alongside live behaviour.
 
 | Documented / specified | Actual behaviour |
 |---|---|
-| `/rest/structures/{type}/{agency}` | **400** — only `/rest/{type}/{agency}/{id}` works |
-| `agencyscheme` | **404** |
+| `/rest/structures/{type}/{agency}` | **400** `Invalid structure: structures` — only `/rest/{type}/{agency}/{id}` works |
+| `agencyscheme` | **404** `Could not find requested structures` |
 | `hierarchicalcodelist` | **404** |
-| `availableconstraint` | **500** |
-| `detail=serieskeysonly` | **Broken.** Returns malformed JSON (`"dataSets":[0]}]}"errors":[]`); CSV returns header row only |
-| Bulk `datastructure/ABS` | **504** at 120s |
-| `categoryscheme/ABS?references=parentsandsiblings` | **504** at 120s |
-| Bulk `contentconstraint/ABS` | Times out (>60s, no response) |
+| `actualconstraint/ABS` | **Times out** at 120s, repeatedly |
+| `detail=serieskeysonly` | **Broken.** HTTP 200 with malformed JSON (`"dataSets":[0]}]}"errors":[]`); CSV returns a header row and zero data rows |
+| Any agency other than `ABS` | **404** — `agencyId` is parameterised but only one agency exists |
 | OpenAPI parameter enums | Stale — omits `lastNObservations`, `firstNObservations`, `updatedAfter`, all of which work |
 | Example URL in user guide | Contains a typo: `data.api..abs.gov.au` |
 
-Only the `ABS` agency exists; `dataflow/all` returns the same as `dataflow/ABS`.
+**Correction to an earlier reading of this API.** Four endpoints were initially
+recorded as broken and are not:
+
+| Endpoint | First observation | Actual |
+|---|---|---|
+| Bulk `datastructure/ABS` | 504 at 120s | **Works** — 3.4MB, 1,229 DSDs |
+| Bulk `contentconstraint/ABS` | timed out | **Works** — 27.6MB, 2,433 constraints |
+| `categoryscheme/ABS?references=parentsandsiblings` | 504 at 120s | **Works** — 25 schemes |
+| `availableconstraint` | 500 | **Works** — see 2.8 |
+
+The cause is caching, not capability: the service sits behind CloudFront and
+Varnish with `cache-control: no-cache`, and only the first *uncached* request for
+these large payloads is slow enough to hit the 120s gateway limit. With
+retry-and-backoff they return in well under a second. The `availableconstraint`
+500 was narrower still — it is triggered by passing `references=none`, and the
+endpoint works when that parameter is omitted.
+
+This matters twice over. It collapses the structural crawl from 1,227 per-flow
+requests (~120MB) to **seven bulk requests, 86MB, 68 seconds**. And it means the
+API is more capable than its documentation suggests, which is worth telling ABS
+alongside the defects.
 
 ### 2.4 The core problem: declared vs actual availability
 
@@ -90,6 +110,58 @@ Content constraints are **per-dimension marginals**, not real key sets. For CPI:
 
 With `serieskeysonly` broken, the only way to establish truth is to pull data.
 This is the entire justification for the observed-only approach.
+
+### 2.8 `availableconstraint` is an exact existence oracle
+
+The single most consequential finding, and it contradicts the claim in 2.4 that
+pulling data is the only way to establish truth.
+
+`GET /rest/availableconstraint/{flow}/{key}/ABS` returns availability
+**conditioned on a partial key**, not a fixed marginal:
+
+| Query | Returned cardinalities |
+|---|---|
+| `CPI/all` | `MEASURE=7 INDEX=161 TSEST=2 REGION=9 FREQ=2` |
+| `CPI/1...1.` (MEASURE=1, REGION=1) | `MEASURE=1 INDEX=154 TSEST=1 REGION=1 FREQ=2` |
+
+Conditioning genuinely narrows the space — `TSEST` collapses from 2 to 1 and
+`INDEX` from 161 to 154. At full key depth it becomes exact:
+
+| Fully-specified key | `availableconstraint` | `data` endpoint |
+|---|---|---|
+| `1.10001.10.50.Q` (real) | all dimensions at 1 | 200 |
+| `1.99999.10.50.Q` (fake code) | empty cube region | 404 |
+| `1.10001.20.1.M` (impossible combination) | empty cube region | 404 |
+
+It agrees with the data endpoint exactly, in ~170ms and ~2.4KB.
+
+**Consequences.** For *cartography* it is not a substitute for data pulls:
+enumerating a 609k-series flow by conditioning would need hundreds of thousands
+of requests, where one data pull costs 42MB. But for the **MCP front door it is
+decisive** — key validation can be answered live against ABS rather than from a
+stored key set. That dissolves the deferred D1 sizing problem (decision 7a)
+almost entirely: D1 need only hold the catalogue, not 20–100M keys.
+
+### 2.9 Declared key space
+
+Measured across all 1,227 flows after the structural crawl:
+
+| Bucket (declared keys) | Flows | Declared keys |
+|---|---|---|
+| <1k | 70 | 24,265 |
+| <10k | 65 | 285,421 |
+| <100k | 135 | 5,720,720 |
+| <1M | 354 | 153,091,519 |
+| <10M | 299 | 1,012,750,608 |
+| >10M | 304 | 13,589,685,285 |
+| **Total** | **1,227** | **14,761,557,818** |
+
+Largest single flow: `ABS_C16_T07_SA` at 545,138,220 declared keys. Flows carry
+2–9 dimensions (mean 5.47).
+
+Observed density varies far too widely to extrapolate from — 4.6%
+(`BA_SA2_201116`) to 100% (`POP_PROJ_REGION`) — which is why the probe is
+preceded by an exact `Range: bytes=0-0` sizing pass rather than an estimate.
 
 ### 2.5 Data volume and shape
 

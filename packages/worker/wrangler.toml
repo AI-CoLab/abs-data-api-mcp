@@ -1,0 +1,21 @@
+name = "abs-data-front-door"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Public and unauthenticated, mirroring the upstream ABS API (DESIGN.md
+# decision 20). Abuse is made cheap rather than blocked (decision 22): the
+# catalogue is read-mostly and every upstream response is cacheable.
+
+[[d1_databases]]
+binding = "CATALOGUE"
+database_name = "abs-catalogue"
+# Populated by `wrangler d1 import` of the SQLite file the crawler builds.
+database_id = "PLACEHOLDER-run-wrangler-d1-create-abs-catalogue"
+
+[[r2_buckets]]
+binding = "RAW_ARCHIVE"
+bucket_name = "abs-raw-archive"
+
+[observability]
+enabled = true
