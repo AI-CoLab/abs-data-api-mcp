@@ -4,7 +4,8 @@
  *   pnpm crawl:probe                     # every flow, resuming past work
  *   pnpm crawl:probe -- CPI LF ALC       # named flows only
  *   pnpm crawl:probe -- --force          # re-probe flows already done
- *   pnpm crawl:probe -- --key-values     # also populate series_key_value
+ *   pnpm crawl:probe -- --key-values=CPI,LF   # index those flows by dimension
+ *   pnpm crawl:probe -- --key-values=*        # index everything (300M+ rows)
  *   pnpm crawl:probe -- --limit=30       # smallest-first slice, for a test run
  *
  * Resumable by default: a flow already recorded as ok/empty in any run is
@@ -29,7 +30,26 @@ const limitArg = argv.find((a) => a.startsWith("--limit="));
 const limit = limitArg ? Number(limitArg.split("=")[1]) : undefined;
 
 const force = flags.has("--force");
-const keyValues = flags.has("--key-values");
+
+/**
+ * --key-values=CPI,C21_G01_LGA   decompose those flows' keys
+ * --key-values=*                 decompose everything (300M+ rows corpus-wide)
+ *
+ * series_key_value duplicates no information — key_string splits back to the
+ * same tuple — but it is the only thing that can index a per-dimension
+ * predicate, since a dimension's key position differs per flow. Scoped per
+ * flow so that capability is available where wanted without materialising it
+ * for the whole corpus.
+ */
+const kvArg = argv.find((a) => a.startsWith("--key-values"));
+const keyValueFlows = kvArg
+  ? new Set(
+      (kvArg.includes("=") ? (kvArg.split("=")[1] ?? "") : "*")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    )
+  : undefined;
 
 const rt = bootstrap({
   runKind: "probe",
@@ -43,13 +63,16 @@ const deps: ProbeDeps = {
   archive: rt.archive,
   runId: rt.runId,
   log: rt.log,
-  keyValues,
+  keyValueFlows,
   maxSplitDepth: Number(process.env["ABS_MAX_SPLIT_DEPTH"] ?? 3),
   passTimeoutMs: Number(process.env["ABS_PASS_TIMEOUT_MS"] ?? 110_000),
 };
 
 try {
-  openProbeRun(deps, JSON.stringify({ force, keyValues, limit, named }));
+  openProbeRun(
+    deps,
+    JSON.stringify({ force, keyValueFlows: [...(keyValueFlows ?? [])], limit, named }),
+  );
 
   const alreadyDone = force
     ? new Set<string>()
@@ -91,7 +114,8 @@ try {
   }
 
   rt.log(
-    `probing ${flows.length} flows (${alreadyDone.size} already done, keyValues=${keyValues})`,
+    `probing ${flows.length} flows (${alreadyDone.size} already done, ` +
+      `key-values: ${[...(keyValueFlows ?? [])].join(",") || "none"})`,
   );
 
   const tally = { ok: 0, empty: 0, partial: 0, error: 0 };

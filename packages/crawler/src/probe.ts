@@ -41,7 +41,19 @@ export interface ProbeDeps {
   runId: string;
   log: (msg: string) => void;
   /** Populate series_key_value (opt-in; see writer.ts). */
-  keyValues?: boolean;
+  /**
+   * Flows for which to materialise `series_key_value`.
+   *
+   * Deliberately per-flow rather than a global switch. The decomposition holds
+   * no information that `series.key_string` does not — no ABS code contains the
+   * "." separator, so the key string splits back to the same tuple — but it is
+   * the only thing that can *index* a per-dimension predicate, because a
+   * dimension sits at a different key position in every flow.
+   *
+   * At ~6 rows per series it is 300M+ rows corpus-wide, so it is built for the
+   * flows someone actually wants to analyse. "*" opts everything in.
+   */
+  keyValueFlows?: ReadonlySet<string> | undefined;
   /** Give up splitting beyond this depth and record the flow as partial. */
   maxSplitDepth?: number;
   /** Shorter than the 120s gateway limit, so a split is tried sooner. */
@@ -214,6 +226,9 @@ interface PassOutcome {
   rows: number;
   bytes: number;
   timedOut: boolean;
+  /** Mid-stream failure: parsed rows are valid but the key set is incomplete. */
+  retryable?: boolean;
+  error?: string | undefined;
   earliest: string | undefined;
   latest: string | undefined;
 }
@@ -268,32 +283,54 @@ async function streamPass(
   }
 
   const [toArchive, toParse] = teeBody(res.body);
-  const archiving = deps.archive.put(
-    archiveKey({ kind: "data", flowId, label, runId: deps.runId }),
-    toArchive,
-  );
 
-  const table = await readCsvTable(toParse, (n) => {
-    outcome.bytes += n;
-  });
+  // The archive branch must be settled independently. If parsing throws first,
+  // an unawaited rejection here takes the whole process down — which is exactly
+  // what happened on ABS_SEIFA2016_SA2, where the upstream HTTP/2 stream died
+  // mid-body (NGHTTP2_INTERNAL_ERROR) after 246 flows.
+  let archiveError: unknown;
+  const archiving = deps.archive
+    .put(archiveKey({ kind: "data", flowId, label, runId: deps.runId }), toArchive)
+    .catch((err: unknown) => {
+      archiveError = err;
+      return 0;
+    });
 
-  if (table) {
-    const plan = planHeader(table.header);
-    if (plan) {
-      for await (const row of table.rows) {
-        if (row.length < plan.timeIndex + 1) continue;
-        onRow(row, plan);
-        outcome.rows += 1;
-        const period = row[plan.timeIndex];
-        if (period) {
-          outcome.earliest = minPeriod(outcome.earliest, period);
-          outcome.latest = maxPeriod(outcome.latest, period);
+  try {
+    const table = await readCsvTable(toParse, (n) => {
+      outcome.bytes += n;
+    });
+
+    if (table) {
+      const plan = planHeader(table.header);
+      if (plan) {
+        for await (const row of table.rows) {
+          if (row.length < plan.timeIndex + 1) continue;
+          onRow(row, plan);
+          outcome.rows += 1;
+          const period = row[plan.timeIndex];
+          if (period) {
+            outcome.earliest = minPeriod(outcome.earliest, period);
+            outcome.latest = maxPeriod(outcome.latest, period);
+          }
         }
       }
     }
+  } catch (err) {
+    // A transport failure part-way through a large body. Rows already parsed
+    // are still valid observations, but the pass is incomplete, so flag it as
+    // retryable: the caller splits into smaller slices rather than trusting a
+    // truncated key set.
+    outcome.retryable = true;
+    outcome.error = err instanceof Error ? err.message : String(err);
+  } finally {
+    await archiving;
   }
 
-  await archiving;
+  if (archiveError !== undefined && outcome.error === undefined) {
+    outcome.error = `archive failed: ${String(archiveError)}`;
+  }
+
   return outcome;
 }
 
@@ -363,7 +400,9 @@ export async function probeFlow(
   const writer = new SeriesWriter(deps.sqlite, {
     flowId,
     runId: deps.runId,
-    ...(deps.keyValues === undefined ? {} : { keyValues: deps.keyValues }),
+    keyValues:
+      deps.keyValueFlows !== undefined &&
+      (deps.keyValueFlows.has("*") || deps.keyValueFlows.has(flowId)),
   });
 
   const result: FlowProbeResult = {
@@ -382,6 +421,7 @@ export async function probeFlow(
   };
 
   const seenKeys = new Set<string>();
+  const streamErrors: string[] = [];
   let sawTimeout = false;
   let exhaustedSplits = false;
 
@@ -413,8 +453,11 @@ export async function probeFlow(
     result.latestPeriod = maxPeriod(result.latestPeriod, outcome.latest);
     if (depth > result.splitDepth) result.splitDepth = depth;
 
-    if (outcome.timedOut) {
+    // A mid-stream transport failure is treated like a timeout: the rows we got
+    // are valid, but the key set is incomplete, so split rather than trust it.
+    if (outcome.timedOut || outcome.retryable) {
       sawTimeout = true;
+      if (outcome.error !== undefined) streamErrors.push(outcome.error);
       return false;
     }
     return true;
