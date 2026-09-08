@@ -72,7 +72,7 @@ the documented claim alongside live behaviour.
 | `/rest/structures/{type}/{agency}` | **400** `Invalid structure: structures` — only `/rest/{type}/{agency}/{id}` works |
 | `agencyscheme` | **404** `Could not find requested structures` |
 | `hierarchicalcodelist` | **404** |
-| `actualconstraint/ABS` | **Times out** at 120s, repeatedly |
+| `actualconstraint/ABS` | Works once warm; **times out** at 120s on a cold cache, like the endpoints below |
 | `detail=serieskeysonly` | **Broken.** HTTP 200 with malformed JSON (`"dataSets":[0]}]}"errors":[]`); CSV returns a header row and zero data rows |
 | Any agency other than `ABS` | **404** — `agencyId` is parameterised but only one agency exists |
 | OpenAPI parameter enums | Stale — omits `lastNObservations`, `firstNObservations`, `updatedAfter`, all of which work |
@@ -135,12 +135,19 @@ Conditioning genuinely narrows the space — `TSEST` collapses from 2 to 1 and
 
 It agrees with the data endpoint exactly, in ~170ms and ~2.4KB.
 
-**Consequences.** For *cartography* it is not a substitute for data pulls:
-enumerating a 609k-series flow by conditioning would need hundreds of thousands
-of requests, where one data pull costs 42MB. But for the **MCP front door it is
-decisive** — key validation can be answered live against ABS rather than from a
-stored key set. That dissolves the deferred D1 sizing problem (decision 7a)
-almost entirely: D1 need only hold the catalogue, not 20–100M keys.
+**Consequences, stated narrowly.** For *cartography* it is not a substitute for
+data pulls: enumerating a 609k-series flow by conditioning would need hundreds of
+thousands of requests, where one data pull costs 42MB.
+
+For the front door it removes the **D1 sizing** obstacle in decision 7a — keys
+can be validated against ABS at call time, so D1 need not carry 20–100M keys.
+
+**It does not amend decision 7.** The observed key set is still stored and is
+still what the MCP server answers existence from; this endpoint is a
+belt-and-braces check at call time, not a replacement for the map. Nor does it
+license serving *declared* dimension values or code lists to callers: those are
+unverified by definition, and offering them would reintroduce ABS's own 5.7×
+overstatement one level up. An earlier proposal to do exactly that was rejected.
 
 ### 2.9 Declared key space
 
@@ -259,8 +266,13 @@ and for ANZSCO occupations `SKILL_LEVEL`, `INDICATIVE_SKILL_LEVEL`,
    `key_string` can serve a predicate like `REGION=1GSYD`, whereas
    `(dimension_id, code_id)` can.
 
-   Because the decomposition is derivable, it is **backfilled offline** from
-   `series` plus `declared_dimension` rather than requiring a re-crawl.
+   **Sourced from the API, never derived.** An offline backfill that split
+   `key_string` was proposed and **rejected**: it would have manufactured rows
+   in the observed store from a concatenation this code had itself produced,
+   which is exactly the local inference the governing principle forbids. The
+   API returns one CSV column per dimension, so the probe writes those values
+   as it parses them. Populating this table therefore requires a probe run, not
+   a post-processing pass.
 
 ### 3a. Provisional, NOT settled
 
