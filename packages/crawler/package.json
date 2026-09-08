@@ -1,0 +1,24 @@
+{
+  "name": "@abs/crawler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "crawl:structural": "tsx src/bin/structural.ts",
+    "crawl:probe": "tsx src/bin/probe.ts",
+    "check:endpoints": "tsx src/bin/endpoints.ts"
+  },
+  "dependencies": {
+    "@abs/schema": "workspace:*",
+    "drizzle-orm": "^0.44.5",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "better-sqlite3": "^12.4.1",
+    "@types/better-sqlite3": "^7.6.13"
+  }
+}

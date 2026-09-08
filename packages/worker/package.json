@@ -1,0 +1,20 @@
+{
+  "name": "@abs/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@abs/schema": "workspace:*",
+    "drizzle-orm": "^0.44.5",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250906.0",
+    "wrangler": "^4.129.1"
+  }
+}

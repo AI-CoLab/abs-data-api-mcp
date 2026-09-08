@@ -1,0 +1,22 @@
+{
+  "name": "abs-data-api-exploration",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r --parallel typecheck",
+    "crawl:structural": "pnpm --filter @abs/crawler crawl:structural",
+    "crawl:probe": "pnpm --filter @abs/crawler crawl:probe",
+    "report:delta": "pnpm --filter @abs/catalogue report:delta",
+    "db:generate": "pnpm --filter @abs/schema db:generate",
+    "db:migrate": "pnpm --filter @abs/schema db:migrate"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "tsx": "^4.20.6",
+    "@types/node": "^24.5.0"
+  }
+}

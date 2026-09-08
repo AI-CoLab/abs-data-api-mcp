@@ -1,0 +1,23 @@
+{
+  "name": "@abs/catalogue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "report:delta": "tsx src/bin/delta.ts",
+    "build:artifact": "tsx src/bin/artifact.ts"
+  },
+  "dependencies": {
+    "@abs/schema": "workspace:*",
+    "drizzle-orm": "^0.44.5",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "better-sqlite3": "^12.4.1",
+    "@types/better-sqlite3": "^7.6.13"
+  }
+}

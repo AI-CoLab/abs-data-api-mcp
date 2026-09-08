@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Local crawl artefacts — regenerable, and far too large for git
+data/
+!data/.gitkeep
+
+.dev.vars
+.wrangler/
+.DS_Store
