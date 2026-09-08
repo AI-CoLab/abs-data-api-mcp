@@ -58,6 +58,35 @@ export const flowProbe = sqliteTable(
 );
 
 /**
+ * Exact payload size per flow per pass, measured with a `Range: bytes=0-0`
+ * request: the server reports the full length in Content-Range while sending
+ * one byte, so the whole corpus can be sized at near-zero bandwidth.
+ *
+ * Used to plan the probe — total volume, which flows need splitting, and which
+ * are confirmed-empty before any bulk download happens.
+ */
+export const flowPayloadSize = sqliteTable(
+  "flow_payload_size",
+  {
+    flowId: text("flow_id").notNull(),
+    runId: text("run_id").notNull(),
+    /** "last" | "first" | "full". */
+    pass: text("pass").notNull(),
+    httpStatus: integer("http_status"),
+    /** Length of the identity (uncompressed) representation, in bytes. */
+    totalBytes: integer("total_bytes"),
+    /** Rough series estimate: totalBytes / mean row width. */
+    estimatedSeries: integer("estimated_series"),
+    durationMs: integer("duration_ms"),
+    measuredAt: text("measured_at").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.flowId, t.runId, t.pass] }),
+    index("flow_payload_size_bytes_idx").on(t.totalBytes),
+  ],
+);
+
+/**
  * Canonical flow record, derived from probing rather than from ABS's dataflow
  * listing. `seriesCount` of 0 means confirmed-empty, not unknown.
  */
