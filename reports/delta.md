@@ -1,6 +1,6 @@
 # ABS Data API — declared vs observed
 
-Generated 2026-09-09T03:08:01.417Z (run `delta-2026-09-09T03-08-01-416Z`).
+Generated 2026-09-09T05:00:01.790Z (run `delta-2026-09-09T05-00-01-789Z`).
 
 This report is derived automatically. Declared metadata comes from the ABS structure endpoints; observed availability was established by pulling data, because `detail=serieskeysonly` does not work. Only empirically-confirmed series are treated as real, and this document is the difference between the two.
 
@@ -15,7 +15,7 @@ This report is derived automatically. Declared metadata comes from the ABS struc
 | Series implied by content constraints | 14,761,557,818 |
 | Series that actually exist | 621,536,714 |
 | Overall density | 4.21% |
-| Documented behaviours checked | 14 (6 non-conforming) |
+| Documented behaviours checked | 15 (8 non-conforming) |
 
 > Content constraints overstate the size of the corpus by roughly **23.8x**. The cube regions published for each dataflow are per-dimension marginals, not the set of real key combinations, so multiplying them out does not describe what can be retrieved.
 
@@ -25,15 +25,16 @@ This report is derived automatically. Declared metadata comes from the ABS struc
 | --- | --- | --- | --- | --- |
 | agency other than ABS | **missing** | 404 | Spec exposes agencyId as a parameter, implying multiple agencies | HTTP 404: Could not find requested structures |
 | agencyscheme | **missing** | 404 | Spec lists agencyscheme as a valid structureType | HTTP 404: Could not find requested structures |
+| categoryscheme with references | **timeout** | — | Spec lists references=parentsandsiblings as a valid value | timeout after 125000ms: https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings |
 | detail=serieskeysonly (CSV) | **broken** | 200 | detail=serieskeysonly should enumerate every series key | HTTP 200 but only 0 data row(s); header-only response |
 | detail=serieskeysonly (JSON) | **malformed** | 200 | Spec lists detail=serieskeysonly: series keys without observations | HTTP 200 but body is not valid JSON (SyntaxError: Unexpected non-whitespace character after JSON at position 42742 (l); tail: "er and the unit of measure.\"}}],\"dataSets\":[0]}]}\"errors\":[]" |
 | documented /structures/ path | **broken** | 400 | User guide documents /structures/{structureType}/{agencyId}/{structureId} | HTTP 400: Invalid structure: structures |
 | hierarchicalcodelist | **missing** | 404 | Spec lists hierarchicalcodelist as a valid structureType | HTTP 404: Could not find requested structures |
+| request without User-Agent | **broken** | 403 | No User-Agent requirement is documented; the API is described as open and keyless | HTTP 403 with a CloudFront HTML error page (not an SDMX error) when User-Agent is absent |
 | actualconstraint | ok | 200 | Spec lists actualconstraint as a valid structureType | HTTP 200, valid JSON |
 | availableconstraint | ok | 200 | SDMX-REST defines availableconstraint for actual data availability | HTTP 200, valid JSON |
 | bulk contentconstraint | ok | 200 | Spec: GET /contentconstraint/ABS returns all content constraints | data.contentConstraints: 2433 items |
 | bulk datastructure | ok | 200 | Spec: GET /datastructure/ABS returns all data structures | data.dataStructures: 1229 items |
-| categoryscheme with references | ok | 200 | Spec lists references=parentsandsiblings as a valid value | data.categorySchemes: 25 items |
 | dataflow listing | ok | 200 | Spec: GET /{structureType}/{agencyId} returns all structures of a type | data.dataflows: 1227 items |
 | firstNObservations (absent from spec) | ok | 200 | Added 2024-11-29 per the user guide; absent from the OpenAPI enum | 1 data row(s) |
 | lastNObservations (absent from spec) | ok | 200 | Added 2024-11-29 per the user guide; absent from the OpenAPI enum | 1 data row(s) |
@@ -44,10 +45,12 @@ This report is derived automatically. Declared metadata comes from the ABS struc
 
 - detail=serieskeysonly (JSON): malformed — HTTP 200 but body is not valid JSON (SyntaxError: Unexpected non-whitespace character after JSON at position 42742 (l); tail: "er and the unit of measure.\"}}],\"dataSets\":[0]}]}\"errors\":[]"
 
-### Documented endpoints that do not work (2)
+### Documented endpoints that do not work (4)
 
 - documented /structures/ path: broken — HTTP 400: Invalid structure: structures
+- categoryscheme with references: timeout — timeout after 125000ms: https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings
 - detail=serieskeysonly (CSV): broken — HTTP 200 but only 0 data row(s); header-only response
+- request without User-Agent: broken — HTTP 403 with a CloudFront HTML error page (not an SDMX error) when User-Agent is absent
 
 ### Content constraints overstate availability (500)
 

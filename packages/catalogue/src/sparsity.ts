@@ -231,6 +231,13 @@ export function renderSparsityMarkdown(s: SparsitySummary): string {
   out.push("");
   out.push("## Dependent-dimension patterns");
   out.push("");
+  out.push(
+    "_Level-1 inference is arithmetic (which dimension cardinalities divide the option product down to " +
+      "the exact series count). Geography patterns — `STATE`, `REGION_TYPE` determined by the region " +
+      "code — are structurally certain. Others listed here are candidates until level-2 verification " +
+      "against the key index confirms them individually._",
+  );
+  out.push("");
   out.push("| Dependent dimension(s) | Flows | Series |");
   out.push("| --- | --- | --- |");
   for (const p of s.patterns.slice(0, 25)) {

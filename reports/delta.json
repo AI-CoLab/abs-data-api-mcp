@@ -1,7 +1,7 @@
 {
   "report": "ABS Data API — declared vs observed delta",
-  "generatedAt": "2026-09-09T03:08:01.417Z",
-  "runId": "delta-2026-09-09T03-08-01-416Z",
+  "generatedAt": "2026-09-09T05:00:01.790Z",
+  "runId": "delta-2026-09-09T05-00-01-789Z",
   "method": "Declared metadata was read from the ABS structure endpoints. Observed availability was established by pulling data (detail=serieskeysonly is broken). Only empirically-confirmed series are treated as real; this report is the derived difference between the two.",
   "totals": {
     "flows": 1227,
@@ -11,12 +11,12 @@
     "declaredKeys": 14761557818,
     "observedSeries": 621536714,
     "overallDensity": 0.042105089561896264,
-    "endpointsChecked": 14,
-    "endpointsNonConforming": 6
+    "endpointsChecked": 15,
+    "endpointsNonConforming": 8
   },
   "findingCounts": {
     "byKind": {
-      "broken-endpoint": 2,
+      "broken-endpoint": 4,
       "spec-drift": 3,
       "malformed-response": 1,
       "constraint-overstatement": 500,
@@ -26,7 +26,7 @@
       "metadata-inconsistency": 1
     },
     "bySeverity": {
-      "major": 314,
+      "major": 316,
       "critical": 1,
       "minor": 195,
       "info": 1
@@ -40,7 +40,7 @@
       "http_status": 404,
       "verdict": "missing",
       "detail": "HTTP 404: Could not find requested structures",
-      "duration_ms": 157
+      "duration_ms": 67
     },
     {
       "label": "agencyscheme",
@@ -49,7 +49,16 @@
       "http_status": 404,
       "verdict": "missing",
       "detail": "HTTP 404: Could not find requested structures",
-      "duration_ms": 1751
+      "duration_ms": 109
+    },
+    {
+      "label": "categoryscheme with references",
+      "url": "https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings",
+      "documented_behaviour": "Spec lists references=parentsandsiblings as a valid value",
+      "http_status": null,
+      "verdict": "timeout",
+      "detail": "timeout after 125000ms: https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings",
+      "duration_ms": 125002
     },
     {
       "label": "detail=serieskeysonly (CSV)",
@@ -58,7 +67,7 @@
       "http_status": 200,
       "verdict": "broken",
       "detail": "HTTP 200 but only 0 data row(s); header-only response",
-      "duration_ms": 36949
+      "duration_ms": 3637
     },
     {
       "label": "detail=serieskeysonly (JSON)",
@@ -67,7 +76,7 @@
       "http_status": 200,
       "verdict": "malformed",
       "detail": "HTTP 200 but body is not valid JSON (SyntaxError: Unexpected non-whitespace character after JSON at position 42742 (l); tail: \"er and the unit of measure.\\\"}}],\\\"dataSets\\\":[0]}]}\\\"errors\\\":[]\"",
-      "duration_ms": 44
+      "duration_ms": 54
     },
     {
       "label": "documented /structures/ path",
@@ -76,7 +85,7 @@
       "http_status": 400,
       "verdict": "broken",
       "detail": "HTTP 400: Invalid structure: structures",
-      "duration_ms": 49
+      "duration_ms": 48
     },
     {
       "label": "hierarchicalcodelist",
@@ -85,7 +94,16 @@
       "http_status": 404,
       "verdict": "missing",
       "detail": "HTTP 404: Could not find requested structures",
-      "duration_ms": 202
+      "duration_ms": 106
+    },
+    {
+      "label": "request without User-Agent",
+      "url": "https://data.api.abs.gov.au/rest/availableconstraint/CPI/all/ABS",
+      "documented_behaviour": "No User-Agent requirement is documented; the API is described as open and keyless",
+      "http_status": 403,
+      "verdict": "broken",
+      "detail": "HTTP 403 with a CloudFront HTML error page (not an SDMX error) when User-Agent is absent",
+      "duration_ms": 14
     },
     {
       "label": "actualconstraint",
@@ -94,7 +112,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "HTTP 200, valid JSON",
-      "duration_ms": 772
+      "duration_ms": 1027
     },
     {
       "label": "availableconstraint",
@@ -103,7 +121,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "HTTP 200, valid JSON",
-      "duration_ms": 43
+      "duration_ms": 1237
     },
     {
       "label": "bulk contentconstraint",
@@ -112,7 +130,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "data.contentConstraints: 2433 items",
-      "duration_ms": 772
+      "duration_ms": 117834
     },
     {
       "label": "bulk datastructure",
@@ -121,16 +139,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "data.dataStructures: 1229 items",
-      "duration_ms": 69
-    },
-    {
-      "label": "categoryscheme with references",
-      "url": "https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings",
-      "documented_behaviour": "Spec lists references=parentsandsiblings as a valid value",
-      "http_status": 200,
-      "verdict": "conforms",
-      "detail": "data.categorySchemes: 25 items",
-      "duration_ms": 71
+      "duration_ms": 99
     },
     {
       "label": "dataflow listing",
@@ -139,7 +148,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "data.dataflows: 1227 items",
-      "duration_ms": 95
+      "duration_ms": 108
     },
     {
       "label": "firstNObservations (absent from spec)",
@@ -148,7 +157,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "1 data row(s)",
-      "duration_ms": 37
+      "duration_ms": 1840
     },
     {
       "label": "lastNObservations (absent from spec)",
@@ -157,7 +166,7 @@
       "http_status": 200,
       "verdict": "conforms",
       "detail": "1 data row(s)",
-      "duration_ms": 42
+      "duration_ms": 1563
     }
   ],
   "findings": [
@@ -196,6 +205,21 @@
       "severity": "major",
       "flowId": null,
       "dimensionId": null,
+      "summary": "categoryscheme with references: timeout — timeout after 125000ms: https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/categoryscheme/ABS?detail=full&references=parentsandsiblings",
+        "documented": "Spec lists references=parentsandsiblings as a valid value",
+        "httpStatus": null,
+        "verdict": "timeout"
+      }
+    },
+    {
+      "kind": "broken-endpoint",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
       "summary": "detail=serieskeysonly (CSV): broken — HTTP 200 but only 0 data row(s); header-only response",
       "declaredValue": null,
       "observedValue": null,
@@ -203,6 +227,21 @@
         "url": "https://data.api.abs.gov.au/rest/data/ABS,CPI/all?detail=serieskeysonly",
         "documented": "detail=serieskeysonly should enumerate every series key",
         "httpStatus": 200,
+        "verdict": "broken"
+      }
+    },
+    {
+      "kind": "broken-endpoint",
+      "severity": "major",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "request without User-Agent: broken — HTTP 403 with a CloudFront HTML error page (not an SDMX error) when User-Agent is absent",
+      "declaredValue": null,
+      "observedValue": null,
+      "evidence": {
+        "url": "https://data.api.abs.gov.au/rest/availableconstraint/CPI/all/ABS",
+        "documented": "No User-Agent requirement is documented; the API is described as open and keyless",
+        "httpStatus": 403,
         "verdict": "broken"
       }
     },

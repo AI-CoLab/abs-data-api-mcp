@@ -195,6 +195,47 @@ trustworthy, the cross-product they imply is not"; (b) it independently
 corroborates crawl completeness — ABS's constraint pipeline and this probe
 measured the same corpus by different routes and agree everywhere.
 
+### 2.11 Structured sparsity (analysed 2026-09-09)
+
+Is the 96% of "missing" combinations principled or arbitrary? Tested per flow
+against the observed key set (`reports/sparsity.md`):
+
+| Classification | Flows | Meaning |
+|---|---|---|
+| Exact cross-product of observed options | 130 | every combination exists |
+| Explained by dependent dimensions | **936** | the key set is the cross-product once dimensions that are functions of another are removed |
+| Unexplained at this depth | 161 | |
+
+**96.4% of all confirmed series** sit in flows whose sparsity is fully explained.
+The dominant mechanism is hierarchical geography encoded as separate dimensions:
+`STATE` is determined by `REGION` in 565 flows; `REGION_TYPE`+`STATE` in a
+further 211. Worked example: `C21_G09_SAL` = 10 × 53 × 3 × 15,352 = 24,409,680
+series exactly once `STATE` is dropped.
+
+**Caveat on level 1.** The dependency inference is arithmetic: it finds the
+smallest dimension set whose cardinalities divide the product down to the exact
+series count. For geography (`STATE`, `REGION_TYPE`) that is structurally
+certain — each region has one state and one type. For a handful of patterns
+(`AGEP`, `BEDD`, `MEASURE` appearing as "dependent") a divisor coincidence is the
+likelier explanation. Level-2 verification against the key index confirms each
+case individually; it was too slow at the first attempt and is queued as a
+bounded follow-up. Until then, treat the geography patterns as established and
+the others as candidates.
+
+Two consequences. For ABS: the fix to the metadata is to *declare the
+dependency*, not to change the marginals (which are already exact, 2.10). For
+the typed front door: flows in the first two classes admit exact, compact static
+types — a cross-product over independent dimensions times the code hierarchy.
+
+### 2.12 Undocumented User-Agent gate
+
+Discovered when the Worker first called upstream: **a request without a
+`User-Agent` header is answered `403` with a CloudFront HTML error page** — not
+an SDMX error, and mentioned nowhere in the user guide or the OpenAPI spec.
+workerd sends no default UA, so every Worker-originated oracle check failed
+closed until one was set. Now part of the conformance suite (8 of 15 documented
+behaviours non-conforming).
+
 ### 2.5 Data volume and shape
 
 Sampled series counts per flow (`lastNObservations=1`) vary by four orders of

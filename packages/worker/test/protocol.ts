@@ -62,7 +62,10 @@ async function rpc(method: string, params: Record<string, unknown> = {}): Promis
 }
 
 async function callTool(name: string, args: Record<string, unknown>, extra: Record<string, unknown> = {}) {
-  return rpc("tools/call", { name, arguments: args, ...extra });
+  // `_noElicitation` is a harness flag, not a tool argument: hoist it to the
+  // request level so the client capabilities are what change.
+  const { _noElicitation, ...toolArgs } = args;
+  return rpc("tools/call", { name, arguments: toolArgs, ...extra, ...(_noElicitation ? { _noElicitation: true } : {}) });
 }
 
 process.stdout.write(`MCP door at ${MCP_URL}\n\n`);
@@ -133,6 +136,11 @@ check(req && /Atlantis/.test(req.message ?? JSON.stringify(req)), "asks for REGI
 process.stdout.write("get_data (impossible combination -> input_required)\n");
 const impossible = await callTool("get_data", { table: "CPI", select: { MEASURE: "1", INDEX: "10001", TSEST: "20", REGION: "1", FREQ: "M" } });
 check(impossible.resultType === "input_required", `MRTR input_required for empty combination (${impossible.resultType})`);
+
+process.stdout.write("get_data (client without elicitation -> typed error, not protocol error)\n");
+const noCap = await callTool("get_data", { table: "CPI", select: { REGION: "Atlantis" }, _noElicitation: true } as Record<string, unknown>);
+check(noCap.isError === true && noCap.structuredContent?.reason === "unknown_option", `degrades to typed error (${noCap.structuredContent?.reason})`);
+check(Array.isArray(noCap.structuredContent?.validOptions) && noCap.structuredContent.validOptions.length > 0, "typed error still carries the observed valid options");
 
 process.stdout.write("get_data (MRTR retry with correction)\n");
 const retried = (await callTool(
