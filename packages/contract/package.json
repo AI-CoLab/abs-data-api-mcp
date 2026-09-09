@@ -7,12 +7,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./verbs": "./src/verbs.ts",
+    "./http": "./src/http-contract.ts",
     "./generated": "./src/generated/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@orpc/contract": "^1.15.0",
     "zod": "^4.1.5"
   }
 }

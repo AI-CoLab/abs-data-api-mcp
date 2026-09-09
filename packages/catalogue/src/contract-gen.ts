@@ -192,13 +192,18 @@ export function generateContract(sqlite: Database, opts: GenerateOptions): Gener
     `  frequencies: string[];\n  coverage: { from: string | null; to: string | null };\n` +
     `  density: number | null;\n  family: string | null;\n  geography: string | null;\n` +
     `  topics: string[];\n  dimensions: TableDimension[];\n}\n\n` +
-    `export const TABLES = ${JSON.stringify(
+    // TableId is a literal union (cheap: 1,227 strings). TABLES is deliberately
+    // NOT `as const`: a union of 1,227 distinct object-literal types blew
+    // TypeScript's type-relation cache ("Map maximum size exceeded") the moment
+    // generic inference in the Worker compared against it. One structural
+    // TableRecord type keeps every consumer fast.
+    `export type TableId =\n${tableEntries.map((t) => `  | ${JSON.stringify(t.id)}`).join("\n")};\n\n` +
+    `export const TABLE_IDS: readonly TableId[] = ${JSON.stringify(tableEntries.map((t) => t.id))};\n\n` +
+    `export const TABLES: Readonly<Record<TableId, TableRecord>> = ${JSON.stringify(
       Object.fromEntries(tableEntries.map((t) => [t.id, t])),
       null,
       1,
-    )} as const satisfies Record<string, TableRecord>;\n\n` +
-    `export type TableId = keyof typeof TABLES;\n` +
-    `export const TABLE_IDS = Object.keys(TABLES) as TableId[];\n`;
+    )};\n`;
   writeFileSync(join(genDir, "tables.ts"), tablesTs, "utf8");
 
   // -------------------------------------------------------------- options
