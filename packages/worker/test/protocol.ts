@@ -6,8 +6,10 @@
  * Exercises the 2026-07-28 surface as a client would: server/discover,
  * tools/list (with cache fields), every tool via tools/call, the MRTR
  * input_required path for an invalid option and for an empty combination, and
- * the HTTP door's typed 422. Fails loudly on the first broken expectation.
+ * the HTTP door's typed 422, and the RPC door through the SDK. Fails loudly on
+ * the first broken expectation.
  */
+import { connect, invalidSelectionFromError, type InvalidSelection } from "@abs/sdk";
 
 const MCP_URL = process.env["ABS_MCP_URL"] ?? "http://localhost:8787/mcp";
 const API_URL = MCP_URL.replace(/\/mcp$/, "/api");
@@ -237,6 +239,60 @@ const invalidJson: any = await invalid.json();
 check(invalid.status === 422 && invalidJson.data?.reason === "unknown_option", `POST /api/data invalid -> ${invalid.status} ${invalidJson.data?.reason}`);
 const docs = await fetch(`${API_URL}/docs`);
 check(docs.ok && (docs.headers.get("content-type") ?? "").includes("html"), "Scalar docs render");
+
+// ------------------------------------------------------------- RPC door
+// Through the SDK, as a developer would: typed stub, one HTTP batch for
+// concurrent calls, typed rejection for a bad selection, WebSocket session.
+process.stdout.write("RPC door (Cap'n Web, via @abs/sdk)\n");
+const RPC_URL = MCP_URL.replace(/\/mcp$/, "/rpc");
+{
+  const abs = connect(RPC_URL);
+  const t0 = Date.now();
+  const [found, described] = await Promise.all([abs.searchTables({ query: "cpi rent", limit: 3 }), abs.describeTable("CPI")]);
+  check(found.results[0]?.id === "CPI" && described.keyFormat === "MEASURE.INDEX.TSEST.REGION.FREQ", `batched searchTables + describeTable in one round trip (${Date.now() - t0}ms)`);
+}
+{
+  const abs = connect(RPC_URL);
+  const data = await abs.getData({ table: "CPI", select: { MEASURE: "1", INDEX: "10001", TSEST: "10", REGION: "Australia", FREQ: "Q" }, lastN: 4 });
+  check(data.key === "1.10001.10.50.Q" && data.rows.length === 4, `getData resolves labels and fetches (${data.key}, ${data.rows.length} rows)`);
+}
+{
+  // Labels that match several options are rejected as ambiguous, with the candidates.
+  const abs = connect(RPC_URL);
+  let ambiguous: InvalidSelection | undefined;
+  try {
+    await abs.getData({ table: "CPI", select: { INDEX: "Rents", REGION: "Australia" } });
+  } catch (err) {
+    ambiguous = invalidSelectionFromError(err);
+  }
+  check(ambiguous?.reason === "ambiguous_option" && ambiguous.validOptions?.length === 2, `ambiguous label rejects with the candidates (${ambiguous?.validOptions?.map((o) => o.code).join(", ")})`);
+}
+{
+  const abs = connect(RPC_URL);
+  let invalid: InvalidSelection | undefined;
+  try {
+    await abs.getData({ table: "CPI", select: { REGION: "Atlantis" } });
+  } catch (err) {
+    invalid = invalidSelectionFromError(err);
+  }
+  check(invalid?.reason === "unknown_option" && (invalid.validOptions?.length ?? 0) > 0, `invalid selection rejects with typed InvalidSelection (${invalid?.reason}, ${invalid?.validOptions?.length} valid options)`);
+}
+{
+  const abs = connect(RPC_URL);
+  let missing: InvalidSelection | undefined;
+  try {
+    await abs.describeTable("NOPE");
+  } catch (err) {
+    missing = invalidSelectionFromError(err);
+  }
+  check(missing?.reason === "unknown_table", `unknown table rejects typed (${missing?.reason})`);
+}
+{
+  using abs = connect(RPC_URL, { transport: "websocket" });
+  const first = await abs.searchTables({ query: "labour force", limit: 2 });
+  const second = await abs.searchOptions({ table: "CPI", dimension: "REGION", query: "Sydney" });
+  check(first.results.length > 0 && second.options.some((o) => o.code === "1"), `WebSocket session serves consecutive calls (${first.results[0]?.id}, REGION ${second.options[0]?.code})`);
+}
 
 // ------------------------------------------------------------------ done
 process.stdout.write(`\n${failures.length === 0 ? "ALL PASSED" : `${failures.length} FAILED`}\n`);

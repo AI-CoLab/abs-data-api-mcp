@@ -9,6 +9,7 @@ that only ever offer what exists.
 |---|---|
 | Front door | <https://abs-data-front-door.aicolab.workers.dev> |
 | MCP (2026-07-28, stateless) — 4 fixed verbs + Code Mode `search`/`execute`, resources, prompts | `https://abs-data-front-door.aicolab.workers.dev/mcp` |
+| RPC door (Cap'n Web; what `@abs/sdk` speaks — HTTP batch or WebSocket) | `https://abs-data-front-door.aicolab.workers.dev/rpc` |
 | HTTP API | `https://abs-data-front-door.aicolab.workers.dev/api/tables` |
 | Scalar reference | <https://abs-data-front-door.aicolab.workers.dev/api/docs> |
 | Corrected OpenAPI | <https://abs-data-front-door.aicolab.workers.dev/api/openapi.json> |
@@ -38,7 +39,8 @@ packages/schema      Drizzle schema (declared vs observed, never joined), shared
 packages/crawler     structural crawl, observed probe, conformance suite, sizing
 packages/catalogue   delta report, sparsity analysis, contract generator, OpenAPI emitter, artifact
 packages/contract    the corrected contract: stable Zod verbs + generated tables/options (per crawl)
-packages/worker      the front door: MCP door (SDK v2) + HTTP door (oRPC + Scalar) on one Worker
+packages/worker      the front door: MCP door (SDK v2) + HTTP door (oRPC + Scalar) + RPC door (Cap'n Web) on one Worker
+packages/sdk         @abs/sdk — typed TypeScript client over the RPC door (connect(), invalidSelectionFromError())
 reports/             delta.md/json, sparsity.md/json, openapi.json, abs-report-draft.md
 data/                local SQLite catalogue (~400GB), raw archive, D1 import SQL — not committed
 ```
@@ -58,7 +60,25 @@ pnpm --filter @abs/catalogue emit:openapi
 cd packages/worker
 npx wrangler d1 execute abs-catalogue --local --file=../../data/d1/00-schema.sql   # then each data file
 npx wrangler dev
-ABS_MCP_URL=http://localhost:8787/mcp npx tsx test/protocol.ts                     # 30 checks
+ABS_MCP_URL=http://localhost:8787/mcp npx tsx test/protocol.ts                     # ~50 checks, all doors
+pnpm --filter @abs/sdk example                                                     # the SDK against production
+```
+
+Using the SDK from TypeScript:
+
+```ts
+import { connect, invalidSelectionFromError } from "@abs/sdk";
+
+const abs = connect(); // https://abs-data-front-door.aicolab.workers.dev/rpc
+const [hits, cpi] = await Promise.all([          // one HTTP batch
+  abs.searchTables({ query: "cpi rent", limit: 3 }),
+  abs.describeTable("CPI"),
+]);
+try {
+  const data = await abs.getData({ table: "CPI", select: { REGION: "Sydney", INDEX: "10001" }, lastN: 4 });
+} catch (err) {
+  const invalid = invalidSelectionFromError(err); // typed: reason, dimension, validOptions from observation
+}
 ```
 
 The probe is resumable: rerunning skips flows already recorded as complete. For

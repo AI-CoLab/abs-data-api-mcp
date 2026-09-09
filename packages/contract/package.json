@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./verbs": "./src/verbs.ts",
     "./http": "./src/http-contract.ts",
+    "./rpc": "./src/rpc-contract.ts",
     "./generated": "./src/generated/index.ts"
   },
   "scripts": {

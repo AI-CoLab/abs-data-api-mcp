@@ -22,9 +22,11 @@ const log = (m: string) => process.stdout.write(`[${((Date.now() - started) / 10
 
 try {
   log("analysing…");
+  // Unbounded by default: every level-1 candidate is verified against its keys.
+  // Set ABS_SPARSITY_VERIFY_MAX_SERIES / ABS_SPARSITY_VERIFY_FLOWS for a quick partial run.
   const summary = analyseSparsity(sqlite, {
-    verifyUpToSeries: Number(process.env["ABS_SPARSITY_VERIFY_MAX_SERIES"] ?? 2_000_000),
-    verifyMaxFlows: Number(process.env["ABS_SPARSITY_VERIFY_FLOWS"] ?? 40),
+    verifyUpToSeries: Number(process.env["ABS_SPARSITY_VERIFY_MAX_SERIES"] ?? Number.POSITIVE_INFINITY),
+    verifyMaxFlows: Number(process.env["ABS_SPARSITY_VERIFY_FLOWS"] ?? Number.POSITIVE_INFINITY),
     log,
   });
 
@@ -44,7 +46,8 @@ try {
 
   log(`flows: ${summary.flows}`);
   log(`exact cross-product: ${summary.exactProduct}`);
-  log(`dependent dimensions: ${summary.dependentDimensions}`);
+  log(`dependent dimensions (verified): ${summary.dependentDimensions}`);
+  log(`arithmetic candidates (unverified): ${summary.arithmeticCandidates}`);
   log(`unexplained: ${summary.unexplained}`);
   log(`series explained: ${(summary.seriesExplainedShare * 100).toFixed(1)}%`);
   log(`verified: ${summary.verifiedOk}/${summary.verifiedFlows}`);

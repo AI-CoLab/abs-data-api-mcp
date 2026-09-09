@@ -603,11 +603,27 @@ Done (2026-09-08 → 09):
     enabled on the account. Verified live: catalogue query, fetch-and-compute,
     catchable validation errors, blocked network.
 
+13. ✔ Daily refresh check on a rotating seventh of the flows (full sweep
+    weekly, within the ~1,000-subrequest budget): dataflow listing diff plus
+    live `availableconstraint` marginals versus observed — which 2.10 showed
+    agree exactly, so a divergence means ABS changed something. Results in
+    `refresh_check` and `/api/status`; cron `0 20 * * *` (06:00 AEST). First
+    local run clean: 175 flows, 0 divergences.
+
+15. ✔ **RPC door + TypeScript SDK (Cap'n Web), live in production.**
+    `AbsRpcServer extends RpcTarget` implements the contract's `AbsRpcApi`
+    with the same Catalogue/resolve/fetch code as the other doors, served at
+    `/rpc` (HTTP batch and WebSocket, via `newWorkersRpcResponse`). `@abs/sdk`
+    is `connect(url) → RpcStub<AbsRpcApi>`: fully typed from the Zod contract,
+    calls before the first `await` travel as one batch (measured: search +
+    describe in one round trip). Rejections carry the typed `InvalidSelection`
+    (Cap'n Web serialises the Error's own `selection` property; the message is
+    the same JSON, so `invalidSelectionFromError` works for RPC and the Code
+    Mode sandbox alike). Protocol suite: 6 RPC checks, all passing live.
+
 Remaining, in order:
 
-13. Weekly Worker cron: structural/constraint diff + `updatedAfter` checks
-    (decision 28). Monthly full re-probe stays self-hosted.
-14. Level-2 sparsity verification, bounded (2.11 caveat).
-15. Cap'n Web `RpcTarget` SDK from the same contract (decision 21).
+14. Level-2 sparsity verification over every level-1 candidate (2.11 caveat) —
+    running; the first bounded sample confirmed only geography dependencies.
 16. Rate limiting, last (decision 22) — with `execute` as the primary reason.
 17. Exposure decisions when ready: repo public, ABS report, registry listing.

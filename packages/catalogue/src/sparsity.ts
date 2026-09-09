@@ -20,9 +20,10 @@
  *     signature: STATE (9) is a function of REGION (15,352 suburbs), giving
  *     exactly 1/9. Integer arithmetic throughout so equality is exact.
  *
- *  2. Verification against the key index for a bounded sample: for an inferred
- *     dependent dimension, every code of the driving dimension must co-occur
- *     with exactly one code of the dependent one.
+ *  2. Verification against the actual keys, for every level-1 candidate: for an
+ *     inferred dependent dimension, every code of some driving dimension must
+ *     co-occur with exactly one code of the dependent one. Only what passes is
+ *     counted as explained; a level-1 match that fails is a divisor coincidence.
  */
 import type { Database } from "better-sqlite3";
 
@@ -34,7 +35,13 @@ export interface FlowSparsity {
   observedProduct: bigint;
   /** series / observedProduct. */
   fill: number;
-  classification: "exact-product" | "dependent-dimensions" | "unexplained";
+  /**
+   * exact-product: level 0. dependent-dimensions: level 1 inferred AND level 2
+   * verified against the keys. arithmetic-candidate: level 1 inferred, not yet
+   * verified (only when verification is bounded). unexplained: neither, or a
+   * level-1 inference that level 2 rejected as a divisor coincidence.
+   */
+  classification: "exact-product" | "dependent-dimensions" | "arithmetic-candidate" | "unexplained";
   /** Dimensions inferred to be functions of others (level 1). */
   dependentDimensions: string[];
   /** Level-2 result when verified: driving dimension per dependent one. */
@@ -45,10 +52,11 @@ export interface SparsitySummary {
   flows: number;
   exactProduct: number;
   dependentDimensions: number;
+  arithmeticCandidates: number;
   unexplained: number;
-  /** Series explained by levels 0+1, as a share of all series. */
+  /** Series in exact-product or verified dependent-dimension flows, as a share of all series. */
   seriesExplainedShare: number;
-  /** How often each dependent-dimension pattern occurs. */
+  /** Verified dependency patterns, e.g. STATE←REGION, and how often each occurs. */
   patterns: Array<{ dependent: string[]; flows: number; series: number }>;
   verifiedFlows: number;
   verifiedOk: number;
@@ -124,7 +132,7 @@ export function analyseSparsity(
         }
       }
       if (found) {
-        entry.classification = "dependent-dimensions";
+        entry.classification = "arithmetic-candidate";
         entry.dependentDimensions = found;
       }
     }
@@ -132,56 +140,91 @@ export function analyseSparsity(
     results.push(entry);
   }
 
-  // Level 2: verify functional dependency on the key index for a bounded set.
-  const verifyUpTo = opts.verifyUpToSeries ?? 2_000_000;
-  const verifyMax = opts.verifyMaxFlows ?? 40;
+  // Level 2: verify functional dependency against the actual keys.
+  //
+  // Streams one flow's key strings (indexed by flow) and splits them at the
+  // dimension positions in code, instead of joining the 3.4B-row key-value
+  // table twice, which the first attempt did and never finished. For a
+  // dependent dimension D driven by X, no X code may pair with more than one
+  // D code. Every candidate is verified by default (the whole corpus streams in
+  // well under an hour); the bounds exist for quick partial runs, in which case
+  // unverified flows keep the arithmetic-candidate class and are not counted
+  // as explained. The first bounded run showed why this is necessary: 9 of 40
+  // level-1 inferences held — all the geography ones — and the rest (AGE, OCCP,
+  // MEASURE, BEDRD, …) were divisor coincidences.
+  const verifyUpTo = opts.verifyUpToSeries ?? Number.POSITIVE_INFINITY;
+  const verifyMax = opts.verifyMaxFlows ?? Number.POSITIVE_INFINITY;
   const candidates = results
-    .filter((r) => r.classification === "dependent-dimensions" && r.seriesCount <= verifyUpTo)
-    .sort((a, b) => b.seriesCount - a.seriesCount)
-    .slice(0, verifyMax);
+    .filter((r) => r.classification === "arithmetic-candidate" && r.seriesCount <= verifyUpTo)
+    .sort((a, b) => a.seriesCount - b.seriesCount)
+    .slice(0, Number.isFinite(verifyMax) ? verifyMax : undefined);
 
-  // For a dependent dimension D driven by dimension X: the number of distinct
-  // (X, D) pairs must equal the number of distinct X codes.
-  const pairStmt = sqlite.prepare(
-    `SELECT COUNT(*) AS pairs FROM (
-       SELECT DISTINCT x.code_id AS xc, d.code_id AS dc
-       FROM series s
-       JOIN series_key_value x ON x.series_id = s.id AND x.dimension_id = ?
-       JOIN series_key_value d ON d.series_id = s.id AND d.dimension_id = ?
-       WHERE s.flow_id = ?
-     )`,
+  const dimOrderStmt = sqlite.prepare(
+    `SELECT dimension_id FROM declared_dimension
+     WHERE flow_id = ? AND dimension_type <> 'TimeDimension' ORDER BY position`,
   );
+  const keysStmt = sqlite.prepare(`SELECT key_string FROM series WHERE flow_id = ?`);
 
   let verifiedFlows = 0;
   let verifiedOk = 0;
   for (const r of candidates) {
+    const order = (dimOrderStmt.all(r.flowId) as Array<{ dimension_id: string }>).map((d) => d.dimension_id);
+    const depIdx = r.dependentDimensions.map((dep) => [dep, order.indexOf(dep)] as const);
+    if (depIdx.some(([, i]) => i === -1)) continue;
+    // Every non-dependent dimension is a candidate driver: a dependent
+    // dimension may be a function of geography, or of some other dimension.
+    const drivers = r.dimensions
+      .filter((d) => !r.dependentDimensions.includes(d.id))
+      .map((d) => [d.id, order.indexOf(d.id)] as const)
+      .filter(([, i]) => i !== -1);
+
+    // One pass over the keys: for each (driver, dependent) pair, driver code ->
+    // set of dependent codes; the dependency holds when every set has size 1.
+    // A set that grows past 1 is disqualified immediately to bound memory.
+    const seen = new Map<string, Map<string, Set<string>>>();
+    const disqualified = new Set<string>();
+    for (const [x] of drivers) for (const [dep] of depIdx) seen.set(`${x}|${dep}`, new Map());
+    for (const row of keysStmt.iterate(r.flowId) as IterableIterator<{ key_string: string }>) {
+      const parts = row.key_string.split(".");
+      for (const [x, xi] of drivers) {
+        const xv = parts[xi] ?? "";
+        for (const [dep, di] of depIdx) {
+          const key = `${x}|${dep}`;
+          if (disqualified.has(key)) continue;
+          const m = seen.get(key)!;
+          const set = m.get(xv) ?? new Set<string>();
+          set.add(parts[di] ?? "");
+          if (set.size > 1) disqualified.add(key);
+          m.set(xv, set);
+        }
+      }
+    }
     const checks: NonNullable<FlowSparsity["verified"]> = [];
-    for (const dep of r.dependentDimensions) {
-      // The driver is the highest-cardinality non-dependent dimension: in the
-      // geography case, the region code determines state and region type.
-      const driver = r.dimensions.find((d) => !r.dependentDimensions.includes(d.id));
-      if (!driver) continue;
-      const pairs = (pairStmt.get(driver.id, dep, r.flowId) as { pairs: number }).pairs;
-      checks.push({ dependent: dep, drivenBy: driver.id, ok: pairs === driver.cardinality });
+    for (const [dep] of depIdx) {
+      const driverFound = drivers.find(([x]) => !disqualified.has(`${x}|${dep}`));
+      checks.push({ dependent: dep, drivenBy: driverFound ? driverFound[0] : "(none)", ok: driverFound !== undefined });
     }
     r.verified = checks;
     verifiedFlows += 1;
-    if (checks.length > 0 && checks.every((c) => c.ok)) verifiedOk += 1;
-    log(
-      `  verified ${r.flowId}: ${checks.map((c) => `${c.dependent}←${c.drivenBy}:${c.ok ? "ok" : "FAIL"}`).join(" ")}`,
-    );
+    const allOk = checks.length > 0 && checks.every((c) => c.ok);
+    if (allOk) verifiedOk += 1;
+    r.classification = allOk ? "dependent-dimensions" : "unexplained"; // a failed check is a coincidence, not structure
+    if (verifiedFlows % 50 === 0 || !allOk) {
+      log(`  verified ${r.flowId} (${r.seriesCount.toLocaleString()} series): ${checks.map((c) => `${c.dependent}←${c.drivenBy}:${c.ok ? "ok" : "FAIL"}`).join(" ")}`);
+    }
   }
 
   const totalSeries = results.reduce((n, r) => n + r.seriesCount, 0);
   const explainedSeries = results
-    .filter((r) => r.classification !== "unexplained")
+    .filter((r) => r.classification === "exact-product" || r.classification === "dependent-dimensions")
     .reduce((n, r) => n + r.seriesCount, 0);
 
   const patternMap = new Map<string, { dependent: string[]; flows: number; series: number }>();
   for (const r of results) {
-    if (r.classification !== "dependent-dimensions") continue;
-    const key = [...r.dependentDimensions].sort().join("+");
-    const p = patternMap.get(key) ?? { dependent: [...r.dependentDimensions].sort(), flows: 0, series: 0 };
+    if (r.classification !== "dependent-dimensions" || !r.verified) continue;
+    const labels = r.verified.map((v) => `${v.dependent}←${v.drivenBy}`).sort();
+    const key = labels.join("+");
+    const p = patternMap.get(key) ?? { dependent: labels, flows: 0, series: 0 };
     p.flows += 1;
     p.series += r.seriesCount;
     patternMap.set(key, p);
@@ -191,6 +234,7 @@ export function analyseSparsity(
     flows: results.length,
     exactProduct: results.filter((r) => r.classification === "exact-product").length,
     dependentDimensions: results.filter((r) => r.classification === "dependent-dimensions").length,
+    arithmeticCandidates: results.filter((r) => r.classification === "arithmetic-candidate").length,
     unexplained: results.filter((r) => r.classification === "unexplained").length,
     seriesExplainedShare: totalSeries > 0 ? explainedSeries / totalSeries : 0,
     patterns: [...patternMap.values()].sort((a, b) => b.flows - a.flows),
@@ -214,34 +258,54 @@ export function renderSparsityMarkdown(s: SparsitySummary): string {
   out.push("| --- | --- | --- |");
   out.push(`| Exact cross-product | ${s.exactProduct} | Every combination of observed options exists |`);
   out.push(
-    `| Dependent dimensions | ${s.dependentDimensions} | Key set is the cross-product once dimensions that are functions of another are removed (e.g. STATE determined by REGION) |`,
+    `| Dependent dimensions (verified) | ${s.dependentDimensions} | Key set is the cross-product once dimensions that are functions of another are removed; each dependency verified against the actual keys (e.g. STATE determined by REGION) |`,
   );
-  out.push(`| Unexplained | ${s.unexplained} | Sparsity not reducible to a rule at this depth |`);
+  if (s.arithmeticCandidates > 0) {
+    out.push(`| Arithmetic candidate (unverified) | ${s.arithmeticCandidates} | Level-1 divisor match not yet checked against the keys; not counted as explained |`);
+  }
+  out.push(`| Unexplained | ${s.unexplained} | Sparsity not reducible to a functional dependency — including arithmetic coincidences the level-1 test flagged and level 2 rejected |`);
   out.push("");
   out.push(
-    `**${pct(s.seriesExplainedShare)} of all confirmed series** sit in flows whose sparsity is fully explained by levels 0–1.`,
+    `**${pct(s.seriesExplainedShare)} of all confirmed series** sit in flows whose sparsity is fully explained and verified.`,
   );
   if (s.verifiedFlows > 0) {
     out.push("");
     out.push(
-      `Level-2 verification against the key index: ${s.verifiedOk} of ${s.verifiedFlows} sampled ` +
-        `dependent-dimension flows confirmed (each driving code maps to exactly one dependent code).`,
+      `Level-2 verification against the actual keys: ${s.verifiedOk} of ${s.verifiedFlows} candidate ` +
+        `flows confirmed (every code of some driving dimension maps to exactly one code of the dependent dimension); ` +
+        `the remainder were arithmetic coincidences and are counted as unexplained.`,
     );
   }
   out.push("");
   out.push("## Dependent-dimension patterns");
   out.push("");
   out.push(
-    "_Level-1 inference is arithmetic (which dimension cardinalities divide the option product down to " +
-      "the exact series count). Geography patterns — `STATE`, `REGION_TYPE` determined by the region " +
-      "code — are structurally certain. Others listed here are candidates until level-2 verification " +
-      "against the key index confirms them individually._",
+    "_Only verified dependencies are listed: for each, every code of the driving dimension maps to exactly " +
+      "one code of the dependent dimension in the actual key set._",
   );
   out.push("");
-  out.push("| Dependent dimension(s) | Flows | Series |");
+  out.push("| Dependency (dependent ← driver) | Flows | Series |");
   out.push("| --- | --- | --- |");
   for (const p of s.patterns.slice(0, 25)) {
     out.push(`| \`${p.dependent.join("` + `")}\` | ${p.flows} | ${p.series.toLocaleString("en-AU")} |`);
+  }
+  out.push("");
+  out.push("## Level-1 inferences rejected at level 2 (largest first)");
+  out.push("");
+  out.push(
+    "_The dimension cardinalities divide the option product down to the exact series count, but no " +
+      "single dimension determines the supposedly dependent one in the actual keys — a coincidence._",
+  );
+  out.push("");
+  out.push("| Dataflow | Series | Supposed dependency |");
+  out.push("| --- | --- | --- |");
+  for (const r of s.results
+    .filter((r) => r.classification === "unexplained" && r.verified && r.verified.some((v) => !v.ok))
+    .sort((a, b) => b.seriesCount - a.seriesCount)
+    .slice(0, 30)) {
+    out.push(
+      `| \`${r.flowId}\` | ${r.seriesCount.toLocaleString("en-AU")} | ${r.verified!.filter((v) => !v.ok).map((v) => `\`${v.dependent}\``).join(", ")} |`,
+    );
   }
   out.push("");
   out.push("## Unexplained flows (largest first)");

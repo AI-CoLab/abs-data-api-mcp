@@ -1,7 +1,8 @@
 /**
  * ABS Data API front door — one Worker, several doors, one observed contract.
  *
- *   POST /mcp                 MCP 2026-07-28 (stateless), four fixed verbs
+ *   POST /mcp                 MCP 2026-07-28 (stateless), four fixed verbs + Code Mode
+ *   POST /rpc                 Cap'n Web RPC door (HTTP batch; GET upgrades to WebSocket) — the SDK's transport
  *   GET  /api/...             HTTP door (oRPC): /api/tables, /api/tables/{id}, ...
  *   GET  /api/docs            Scalar reference
  *   GET  /api/openapi.json    the corrected OpenAPI document
@@ -23,6 +24,7 @@ export { AbsToolsEntrypoint } from "./codemode.ts";
 import { buildMcpServer } from "./mcp.ts";
 import { httpHandler } from "./http.ts";
 import { recentChecks, runRefreshCheck } from "./refresh.ts";
+import { handleRpc } from "./rpc.ts";
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" } as const;
 
@@ -45,6 +47,10 @@ export default {
       ctx.waitUntil(handler.close());
       return response;
     }
+
+    // The RPC door (Cap'n Web): what @abs/sdk speaks. One target per request;
+    // capnweb handles batch POSTs and WebSocket upgrades itself.
+    if (url.pathname === "/rpc") return handleRpc(request, env);
 
     // The menu as one document — the equivalent of the OpenAPI spec in
     // Cloudflare's two-tool Code Mode: every table, its key structure and
@@ -133,6 +139,7 @@ export default {
         corpus: MANIFEST.corpus,
         doors: {
           mcp: `${url.origin}/mcp`,
+          rpc: `${url.origin}/rpc`,
           api: `${url.origin}/api/tables`,
           docs: `${url.origin}/api/docs`,
           openapi: `${url.origin}/api/openapi.json`,

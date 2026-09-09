@@ -10,6 +10,8 @@ Is the gap between advertised and real combinations *principled* or *arbitrary*?
 
 **96.4% of all confirmed series** sit in flows whose sparsity is fully explained by levels 0–1.
 
+Level-2 verification against the key index: 9 of 40 sampled dependent-dimension flows confirmed (each driving code maps to exactly one dependent code).
+
 ## Dependent-dimension patterns
 
 _Level-1 inference is arithmetic (which dimension cardinalities divide the option product down to the exact series count). Geography patterns — `STATE`, `REGION_TYPE` determined by the region code — are structurally certain. Others listed here are candidates until level-2 verification against the key index confirms them individually._
