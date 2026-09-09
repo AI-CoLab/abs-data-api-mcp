@@ -10,8 +10,9 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "CATALOGUE"
 database_name = "abs-catalogue"
-# Populated by `wrangler d1 import` of the SQLite file the crawler builds.
-database_id = "PLACEHOLDER-run-wrangler-d1-create-abs-catalogue"
+# Created 2026-09-09 in region OC. Populated from data/d1/*.sql, which the
+# contract generator emits from the observed catalogue each crawl.
+database_id = "38885996-8b80-45a2-8f29-51268a8274a4"
 
 [[r2_buckets]]
 binding = "RAW_ARCHIVE"
