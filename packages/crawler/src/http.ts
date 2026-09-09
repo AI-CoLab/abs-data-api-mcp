@@ -37,6 +37,12 @@ export interface AbsRequest {
   /** Inclusive byte range, for chunking oversized responses. */
   range?: { start: number; end: number } | undefined;
   timeoutMs?: number;
+  /**
+   * Override retry budget. Data-pass callers set 2: a gateway 5xx on a giant
+   * flow means "too big to generate" deterministically, so retries are dead
+   * time — the caller treats it as a split signal instead.
+   */
+  maxAttempts?: number;
 }
 
 export interface AbsResponse {
@@ -49,6 +55,14 @@ export interface AbsResponse {
   totalBytes: number | undefined;
   durationMs: number;
   attempts: number;
+  /**
+   * Aborts the in-flight response, erroring both tee branches of the body.
+   * The request timeout only guards time-to-headers; a body that stalls after
+   * headers hangs forever without this — observed as a 9-hour zero-CPU wedge
+   * on C21_G09_SAL when CloudFront dropped connections without clean closes.
+   * Callers run a stall watchdog over their byte counter and call this.
+   */
+  abort: () => void;
 }
 
 /** Distinguishes "ABS said no such thing" from "the request fell over". */
@@ -131,11 +145,12 @@ export class AbsClient {
     const release = await this.semaphore.acquire();
     const url = this.buildUrl(req.path, req.query);
     const timeoutMs = req.timeoutMs ?? this.timeoutMs;
+    const maxAttempts = req.maxAttempts ?? this.maxAttempts;
 
     try {
       let lastError: unknown;
 
-      for (let attempt = 1; attempt <= this.maxAttempts; attempt += 1) {
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
         const started = performance.now();
@@ -163,7 +178,7 @@ export class AbsClient {
               "status",
               attempt,
             );
-            if (attempt < this.maxAttempts) {
+            if (attempt < maxAttempts) {
               this.stats.retries += 1;
               await backoff(attempt);
               continue;
@@ -180,6 +195,7 @@ export class AbsClient {
             totalBytes: totalBytesFrom(res.headers),
             durationMs,
             attempts: attempt,
+            abort: () => controller.abort(),
           };
         } catch (err) {
           clearTimeout(timer);
@@ -196,7 +212,7 @@ export class AbsClient {
 
           // A timeout means the response is too big to generate in time. Retrying
           // it identically will time out again, so surface it for splitting.
-          if (aborted || attempt >= this.maxAttempts) throw lastError;
+          if (aborted || attempt >= maxAttempts) throw lastError;
           this.stats.retries += 1;
           await backoff(attempt);
         }

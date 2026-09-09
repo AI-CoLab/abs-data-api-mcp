@@ -66,6 +66,7 @@ const deps: ProbeDeps = {
   keyValueFlows,
   maxSplitDepth: Number(process.env["ABS_MAX_SPLIT_DEPTH"] ?? 3),
   sliceConcurrency: Number(process.env["ABS_SLICE_CONCURRENCY"] ?? 6),
+  stallMs: Number(process.env["ABS_STALL_MS"] ?? 180_000),
   passTimeoutMs: Number(process.env["ABS_PASS_TIMEOUT_MS"] ?? 110_000),
 };
 

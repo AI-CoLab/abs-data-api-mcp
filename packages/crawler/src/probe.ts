@@ -65,6 +65,8 @@ export interface ProbeDeps {
    * multiplying concurrent response streams.
    */
   sliceConcurrency?: number;
+  /** Abort a response whose body goes quiet for this long (default 180s). */
+  stallMs?: number;
   /** Shorter than the 120s gateway limit, so a split is tried sooner. */
   passTimeoutMs?: number;
 }
@@ -224,10 +226,47 @@ export function chooseSplitDimension<D>(
 /** Builds an SDMX dataKey: codes in dimension order, empty segment = wildcard. */
 export function buildDataKey(
   dimensions: readonly FlowDimension[],
-  assignments: ReadonlyMap<string, string>,
+  assignments: ReadonlyMap<string, readonly string[]>,
 ): string {
   if (assignments.size === 0) return "all";
-  return dimensions.map((d) => assignments.get(d.dimensionId) ?? "").join(".");
+  // The API's OR syntax ("1+2+3") lets one slice cover many codes, which is
+  // what keeps fan-out bounded when a dimension has thousands of codes.
+  return dimensions.map((d) => (assignments.get(d.dimensionId) ?? []).join("+")).join(".");
+}
+
+/**
+ * Dedupe set that shards by key prefix. A single V8 Set caps out at 2^24
+ * entries (16,777,216) — C21_G47_SAL hit that ceiling exactly, silently
+ * truncating its key set at 95%. Sharding by the first two key segments keeps
+ * every shard far below the limit.
+ */
+export class ShardedKeySet {
+  private readonly shards = new Map<string, Set<string>>();
+  size = 0;
+
+  private shardOf(key: string): string {
+    const first = key.indexOf(".");
+    if (first === -1) return key;
+    const second = key.indexOf(".", first + 1);
+    return second === -1 ? key.slice(0, first) : key.slice(0, second);
+  }
+
+  has(key: string): boolean {
+    return this.shards.get(this.shardOf(key))?.has(key) ?? false;
+  }
+
+  add(key: string): void {
+    const shard = this.shardOf(key);
+    let set = this.shards.get(shard);
+    if (!set) {
+      set = new Set();
+      this.shards.set(shard, set);
+    }
+    if (!set.has(key)) {
+      set.add(key);
+      this.size += 1;
+    }
+  }
 }
 
 interface PassOutcome {
@@ -272,10 +311,15 @@ async function streamPass(
       accept: ACCEPT.dataCsv,
       query,
       timeoutMs: deps.passTimeoutMs ?? 110_000,
+      // A gateway 5xx on a data pass means "too big to generate" — retrying is
+      // dead time, and exhausting four fast 5xxs used to abort the whole flow.
+      maxAttempts: 2,
     });
   } catch (err) {
-    if (err instanceof AbsHttpError && err.kind === "timeout") {
+    if (err instanceof AbsHttpError && (err.kind === "timeout" || err.kind === "status")) {
+      // Both are split signals: the server cannot produce this slice whole.
       outcome.timedOut = true;
+      if (err.kind === "status") outcome.error = err.message;
       return outcome;
     }
     throw err;
@@ -290,6 +334,17 @@ async function streamPass(
     await res.body.cancel();
     return outcome;
   }
+
+  // Stall watchdog. The request timeout only guards time-to-headers; a body
+  // that goes quiet afterwards would otherwise hang this pass forever — the
+  // C21_G09_SAL wedge: nine hours at zero CPU with no open sockets. Any
+  // silence beyond the stall budget aborts the response, erroring both tee
+  // branches, and the existing mid-stream handler turns that into a split.
+  const stallMs = deps.stallMs ?? 180_000;
+  let lastActivity = Date.now();
+  const watchdog = setInterval(() => {
+    if (Date.now() - lastActivity > stallMs) res.abort();
+  }, 10_000);
 
   const [toArchive, toParse] = teeBody(res.body);
 
@@ -308,6 +363,7 @@ async function streamPass(
   try {
     const table = await readCsvTable(toParse, (n) => {
       outcome.bytes += n;
+      lastActivity = Date.now();
     });
 
     if (table) {
@@ -333,6 +389,7 @@ async function streamPass(
     outcome.retryable = true;
     outcome.error = err instanceof Error ? err.message : String(err);
   } finally {
+    clearInterval(watchdog);
     await archiving;
   }
 
@@ -437,7 +494,7 @@ export async function probeFlow(
     latestPeriod: undefined,
   };
 
-  const seenKeys = new Set<string>();
+  const seenKeys = new ShardedKeySet();
   const streamErrors: string[] = [];
   const sliceGate = new Semaphore(deps.sliceConcurrency ?? 6);
   let sawTimeout = false;
@@ -483,7 +540,7 @@ export async function probeFlow(
 
   /** Recursively split on the highest-cardinality dimension still unassigned. */
   const splitAndProbe = async (
-    assignments: Map<string, string>,
+    assignments: Map<string, readonly string[]>,
     depth: number,
   ): Promise<void> => {
     const maxDepth = deps.maxSplitDepth ?? 3;
@@ -492,23 +549,39 @@ export async function probeFlow(
       return;
     }
 
-    const remaining = dimensions.filter((d) => !assignments.has(d.dimensionId));
-    if (remaining.length === 0) {
-      exhaustedSplits = true;
-      return;
+    // A dimension can be split fresh (full candidate codes) or re-split (the
+    // subset already assigned to this slice). Re-splitting is what lets an
+    // OR-group that is still too big subdivide instead of dead-ending.
+    const candidates: Array<{ dim: FlowDimension; codes: string[] }> = [];
+    for (const dim of dimensions) {
+      const assigned = assignments.get(dim.dimensionId);
+      if (assigned === undefined) {
+        candidates.push({ dim, codes: splitCandidates(deps.db, flowId, dim) });
+      } else if (assigned.length > 1) {
+        candidates.push({ dim, codes: [...assigned] });
+      }
     }
 
-    const best = chooseSplitDimension(
-      remaining.map((dim) => ({ dim, codes: splitCandidates(deps.db, flowId, dim) })),
-    );
-
+    const best = chooseSplitDimension(candidates);
     if (!best) {
       exhaustedSplits = true;
       return;
     }
 
+    // Bound fan-out with the API's OR syntax: a dimension with thousands of
+    // codes becomes at most SPLIT_MAX_FANOUT OR-groups, each recursively
+    // subdividable, instead of thousands of single-code slices. C21_G09_SAL
+    // previously hit a 15,352-way fan-out on its geography dimension.
+    const groupCount = Math.min(best.codes.length, SPLIT_MAX_FANOUT);
+    const groupSize = Math.ceil(best.codes.length / groupCount);
+    const groups: string[][] = [];
+    for (let i = 0; i < best.codes.length; i += groupSize) {
+      groups.push(best.codes.slice(i, i + groupSize));
+    }
+
     deps.log(
-      `    ${flowId}: splitting on ${best.dim.dimensionId} (${best.codes.length} codes) at depth ${depth}`,
+      `    ${flowId}: splitting on ${best.dim.dimensionId} ` +
+        `(${best.codes.length} codes -> ${groups.length} groups) at depth ${depth}`,
     );
 
     // Slices are disjoint key subspaces — parallel-safe. The gate is shared
@@ -518,15 +591,19 @@ export async function probeFlow(
     // is only ever mutated synchronously between awaits, so the single-threaded
     // event loop keeps it consistent.
     await Promise.all(
-      best.codes.map(async (codeId) => {
+      groups.map(async (group, index) => {
         const next = new Map(assignments);
-        next.set(best.dim.dimensionId, codeId);
+        next.set(best.dim.dimensionId, group);
         const key = buildDataKey(dimensions, next);
 
         const release = await sliceGate.acquire();
         let ok: boolean;
         try {
-          ok = await lastPass(key, `last-d${depth}-${best.dim.dimensionId}-${codeId}`, depth);
+          ok = await lastPass(
+            key,
+            `last-d${depth}-${best.dim.dimensionId}-g${index}x${group.length}`,
+            depth,
+          );
         } finally {
           release();
         }
