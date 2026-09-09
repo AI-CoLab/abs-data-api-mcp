@@ -20,7 +20,7 @@
  *
  * Everything written here goes to the `declared_*` tables and is treated as
  * unverified: content constraints are per-dimension marginals and overstate
- * CPI's real series count by 5.7x. Their purpose is to describe the dimension
+ * CPI's real series count by 4.8x and the corpus by 23.8x. Their purpose is to describe the dimension
  * space for the probe and to feed the delta report — never to answer
  * availability.
  */

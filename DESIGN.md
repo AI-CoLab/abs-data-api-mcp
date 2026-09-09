@@ -105,8 +105,14 @@ alongside the defects.
 Content constraints are **per-dimension marginals**, not real key sets. For CPI:
 
 - Declared: `MEASURE(7) × INDEX(161) × TSEST(2) × REGION(9) × FREQ(2)` = **40,572** series
-- Observed: **7,168** distinct series
-- Density: **17.7%** — declared overstates by ~5.7×
+- Observed: **8,467** distinct series (8,055 monthly, 412 quarterly)
+- Density: **20.9%** — declared overstates by ~4.8×
+
+*Corrected 2026-09-09.* The first-day figure of 7,168 (17.7%, 5.7×) came from a
+shell one-liner over the CSV; the project's own RFC 4180 parser, run against the
+archived response, finds 8,467 rows, 8,467 distinct keys and no duplicates, and
+the catalogue records the same. The one-liner was wrong; the corpus-level
+figures (621,536,714 series, 4.21%, 23.8×) were never derived from it.
 
 With `serieskeysonly` broken, the only way to establish truth is to pull data.
 This is the entire justification for the observed-only approach.
@@ -146,7 +152,7 @@ can be validated against ABS at call time, so D1 need not carry 20–100M keys.
 still what the MCP server answers existence from; this endpoint is a
 belt-and-braces check at call time, not a replacement for the map. Nor does it
 license serving *declared* dimension values or code lists to callers: those are
-unverified by definition, and offering them would reintroduce ABS's own 5.7×
+unverified by definition, and offering them would reintroduce ABS's own 23.8×
 overstatement one level up. An earlier proposal to do exactly that was rejected.
 
 ### 2.9 Declared key space
@@ -247,7 +253,7 @@ magnitude:
 | `WPI` | 395 | 23KB |
 | `LF` | 743 | 47KB |
 | `ABS_LABOUR_ACCT` | 4,352 | 319KB |
-| `CPI` | 7,168 | 473KB |
+| `CPI` | 8,467 | 473KB |
 | `ABS_ANNUAL_ERP_LGA2024` | 31,748 | 2.4MB |
 | `C21_G01_LGA` | 60,965 | 3.4MB |
 | `ABS_C16_G43_LGA` | 202,679 | 13.8MB |
@@ -257,13 +263,16 @@ magnitude:
 Full-history pulls are larger again (`ABS_ANNUAL_ERP_LGA2024` is 58MB).
 
 **No silent truncation.** Two full CPI pulls were byte-identical
-(38,567,159 bytes, 748,157 rows, 7,168 distinct series), and every series
+(38,567,159 bytes, 748,157 rows), and every series
 returned by `lastNObservations=1` is present in the full pull.
 
 ### 2.6 Parsing hazards
 
-- **`OBS_COMMENT` contains embedded newlines.** Naive line counting overcounts
-  CPI series by ~18%. A real CSV parser is mandatory.
+- **Quoted fields (`OBS_COMMENT`) may contain commas and newlines**, so an
+  RFC 4180 parser is mandatory on principle. *Corrected 2026-09-09:* an early
+  claim that embedded newlines inflated CPI's line count by ~18% was wrong — for
+  CPI, parsed rows and physical lines agree exactly; the discrepancy was the
+  shell one-liner, not the file.
 - **CSV column sets are per-flow, not fixed.** `ABS_LABOUR_ACCT` carries
   `UNIT_MULT` and dimensions `ASGS_2016`/`LABOURACCT_IND`; CPI carries neither.
   Headers must be parsed dynamically.

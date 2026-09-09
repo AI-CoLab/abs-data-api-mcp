@@ -3,9 +3,10 @@
  *
  * Two measured facts make a real parser mandatory rather than nice-to-have:
  *
- *   1. `OBS_COMMENT` contains embedded newlines. Splitting on "\n" overcounts
- *      CPI's series by ~18% (8,466 apparent rows vs 7,168 real series), which
- *      would silently corrupt every count in the catalogue.
+ *   1. Quoted fields (`OBS_COMMENT`) may contain commas and newlines (RFC 4180),
+ *      so splitting on "\n" or "," is not safe in general. (An early claim that
+ *      this inflated CPI's row count by ~18% was wrong — CPI's parsed rows and
+ *      physical lines agree exactly; the principle stands, the example did not.)
  *   2. Column sets differ per flow. ABS_LABOUR_ACCT carries UNIT_MULT and
  *      dimensions ASGS_2016/LABOURACCT_IND; CPI carries neither. Headers must
  *      be read from the response, never assumed.

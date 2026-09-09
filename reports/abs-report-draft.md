@@ -38,7 +38,7 @@ observed in real data. Nothing advertised is missing; nothing real is
 unadvertised. The error is entirely in the implied cross-product.
 
 Example — `CPI`: declared `MEASURE(7) × INDEX(161) × TSEST(2) × REGION(9) ×
-FREQ(2)` = 40,572 combinations; 7,168 exist (17.7%).
+FREQ(2)` = 40,572 combinations; 8,467 exist (20.9%).
 
 ## 2. The missing combinations are 96% principled — hierarchical geography encoded as separate dimensions
 

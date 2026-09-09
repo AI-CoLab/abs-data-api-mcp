@@ -2,7 +2,7 @@
  * DECLARED metadata — what ABS says exists.
  *
  * Known to be wrong: content constraints are per-dimension marginals, so for
- * CPI they imply 40,572 series where only 7,168 exist (17.7% density, a 5.7x
+ * CPI they imply 40,572 series where only 8,467 exist (20.9% density, a 4.8x
  * overstatement). Nothing in here is authoritative.
  *
  * These tables exist for exactly two reasons:
