@@ -87,6 +87,8 @@ export async function runRefreshCheck(env: Env, opts: { slice?: number; now?: Da
 
   const marginalChanges: RefreshSummary["marginalChanges"] = [];
   const errors: RefreshSummary["errors"] = [];
+  let liveCalls = 0;
+  let liveLatencyMs = 0;
   const queue = [...sliceFlows];
   await Promise.all(
     Array.from({ length: CONCURRENCY }, async () => {
@@ -94,7 +96,10 @@ export async function runRefreshCheck(env: Env, opts: { slice?: number; now?: Da
         const flow = queue.shift();
         if (!flow) return;
         try {
+          const t0 = Date.now();
           const a = await checkAvailability(flow, "all");
+          liveCalls += 1;
+          liveLatencyMs += Date.now() - t0;
           if (!a.exists) {
             errors.push({ flow, error: "availableconstraint returned no dimensions" });
             continue;
@@ -110,6 +115,9 @@ export async function runRefreshCheck(env: Env, opts: { slice?: number; now?: Da
     }),
   );
   marginalChanges.sort((a, b) => a.flow.localeCompare(b.flow) || a.dimension.localeCompare(b.dimension));
+  console.log(
+    `refresh check: ${liveCalls} live oracle calls, avg ${liveCalls ? Math.round(liveLatencyMs / liveCalls) : 0}ms each`,
+  );
 
   const changed = newFlows.length + removedFlows.length + reversionedFlows.length + marginalChanges.length > 0;
   const summary: RefreshSummary = {
