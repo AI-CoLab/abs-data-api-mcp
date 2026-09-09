@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.AI-CoLab/abs-data",
+  "name": "io.github.SamJB123/abs-data",
   "title": "ABS Data (observed)",
   "description": "Australian Bureau of Statistics data: 1,227 tables, offering only options confirmed to serve data",
   "version": "0.1.0",
