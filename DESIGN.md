@@ -590,7 +590,7 @@ Done (2026-09-08 → 09):
 1. ✔ Workspace, Drizzle schema, structural crawler — structural crawl in 68s.
 2. ✔ Observed probe with OR-group splitting, stall watchdog, sharded dedupe —
    all 1,227 flows, 621,536,714 series, 399GB local catalogue.
-3. ✔ Delta report (513 findings), sparsity analysis (81.0% verified-explained, see 2.11),
+3. ✔ Delta report (683 findings after the full probe; 513 at first pass), sparsity analysis (81.0% verified-explained, see 2.11),
    corrected OpenAPI document, drafted ABS report (`reports/`).
 4. ✔ Search-first artifact published.
 5. ✔ Contract generator → `@abs/contract` + D1 import (3.9M rows, 185MB SQL).
@@ -648,5 +648,9 @@ Done (2026-09-08 → 09):
 
 Remaining:
 
-17. Exposure decisions when ready (the user's call): repo public, ABS report,
-    registry listing. Everything functional is shipped.
+17. Exposure (go given 2026-09-09): repo public at
+    `github.com/AI-CoLab/abs-data-api-mcp` with description and topics; ABS
+    report finalised with the corrected figures (`reports/abs-report-draft.md`,
+    to be sent by the user to api.data@abs.gov.au); official MCP registry
+    listing as `io.github.AI-CoLab/abs-data` (`server.json`, validated) —
+    publish requires an interactive GitHub login by an org owner.

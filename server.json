@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.AI-CoLab/abs-data",
+  "title": "ABS Data (observed)",
+  "description": "Australian Bureau of Statistics data: 1,227 tables, offering only options confirmed to serve data",
+  "version": "0.1.0",
+  "websiteUrl": "https://abs-data-front-door.aicolab.workers.dev",
+  "repository": {
+    "url": "https://github.com/AI-CoLab/abs-data-api-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://abs-data-front-door.aicolab.workers.dev/mcp"
+    }
+  ]
+}

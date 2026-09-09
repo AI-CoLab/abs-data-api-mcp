@@ -123,7 +123,7 @@ export class AbsClient {
     this.baseUrl = opts.baseUrl ?? ABS_BASE;
     this.userAgent =
       opts.userAgent ??
-      "abs-data-api-cartography/0.1 (+https://github.com/sambide/abs-data-api-exploration)";
+      "abs-data-api-cartography/0.1 (+https://github.com/AI-CoLab/abs-data-api-mcp)";
   }
 
   buildUrl(path: string, query?: AbsRequest["query"]): string {

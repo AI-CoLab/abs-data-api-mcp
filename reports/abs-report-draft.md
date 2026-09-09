@@ -1,6 +1,7 @@
 # The ABS Data API as it actually behaves — findings from a complete empirical crawl
 
-**DRAFT for review — not sent.** Intended recipient: api.data@abs.gov.au.
+Prepared for api.data@abs.gov.au. Source and tooling:
+<https://github.com/AI-CoLab/abs-data-api-mcp>.
 
 ## Summary
 
@@ -40,7 +41,7 @@ unadvertised. The error is entirely in the implied cross-product.
 Example — `CPI`: declared `MEASURE(7) × INDEX(161) × TSEST(2) × REGION(9) ×
 FREQ(2)` = 40,572 combinations; 8,467 exist (20.9%).
 
-## 2. The missing combinations are 96% principled — hierarchical geography encoded as separate dimensions
+## 2. Four-fifths of the missing combinations are principled — hierarchical geography encoded as separate dimensions
 
 Testing each flow's real key set against the cross-product of its options:
 
@@ -137,13 +138,16 @@ In fairness — much does, and better than documented:
   and `firstNObservations=1` retrievals to enumerate real series, splitting
   oversized flows recursively along dimension OR-groups. Every raw response was
   archived.
-- Machine-readable findings: `reports/delta.json` (513 findings) and
+- Machine-readable findings: `reports/delta.json` (683 findings) and
   `reports/sparsity.json`; endpoint conformance results with URLs and response
   excerpts are included.
 - A corrected OpenAPI 3.1 document describing the API as observed:
   `reports/openapi.json`, also served live at
   <https://abs-data-front-door.aicolab.workers.dev/api/openapi.json>.
 - Tooling (TypeScript, open source): the crawler, conformance suite and report
-  generators in this repository.
+  generators at <https://github.com/AI-CoLab/abs-data-api-mcp>. The same
+  repository runs a public front door to the API that offers only what
+  observation confirmed — <https://abs-data-front-door.aicolab.workers.dev> —
+  which may itself be a useful illustration of what the metadata could support.
 
 We would be glad to share the raw archive or walk through any finding.

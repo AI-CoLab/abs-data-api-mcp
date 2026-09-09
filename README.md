@@ -8,6 +8,7 @@ that only ever offer what exists.
 | | |
 |---|---|
 | Front door | <https://abs-data-front-door.aicolab.workers.dev> |
+| Add to claude.ai / any MCP client as a connector | `https://abs-data-front-door.aicolab.workers.dev/mcp` (registry name `io.github.AI-CoLab/abs-data`) |
 | MCP (2026-07-28, stateless) — 4 fixed verbs + Code Mode `search`/`execute`, resources, prompts | `https://abs-data-front-door.aicolab.workers.dev/mcp` |
 | RPC door (Cap'n Web; what `@abs/sdk` speaks — HTTP batch or WebSocket) | `https://abs-data-front-door.aicolab.workers.dev/rpc` |
 | HTTP API | `https://abs-data-front-door.aicolab.workers.dev/api/tables` |
