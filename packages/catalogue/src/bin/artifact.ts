@@ -32,7 +32,25 @@ try {
     throw new Error("template is missing the /*__PAYLOAD__*/ placeholder");
   }
 
-  writeFileSync(outPath, template.replace("/*__PAYLOAD__*/", json), "utf8");
+  // Function replacement, deliberately: with a string replacement, "$" runs
+  // substitution patterns — and ABS labels contain "$'000" (thousands), whose
+  // $' means "everything after the match", splicing the template's own tail
+  // (including a </script>) into the middle of the payload.
+  const page = template.replace("/*__PAYLOAD__*/", () => json);
+
+  // Self-verify what a browser will actually see: re-extract the script block
+  // from the final page and parse it. Catches any future escaping bug before
+  // it publishes.
+  const start = page.indexOf(">", page.indexOf('<script id="payload"')) + 1;
+  const extracted = page.slice(start, page.indexOf("</script>", start));
+  JSON.parse(extracted); // throws on corruption
+  if (extracted.length !== json.length) {
+    throw new Error(
+      `payload changed during templating: ${json.length} -> ${extracted.length} bytes`,
+    );
+  }
+
+  writeFileSync(outPath, page, "utf8");
 
   const bytes = statSync(outPath).size;
   process.stdout.write(`wrote ${outPath}\n`);
