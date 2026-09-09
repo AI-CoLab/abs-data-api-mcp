@@ -11,6 +11,8 @@
     "crawl:structural": "pnpm --filter @abs/crawler crawl:structural",
     "crawl:probe": "pnpm --filter @abs/crawler crawl:probe",
     "report:delta": "pnpm --filter @abs/catalogue report:delta",
+    "report:sparsity": "pnpm --filter @abs/catalogue report:sparsity",
+    "generate:contract": "pnpm --filter @abs/catalogue generate:contract",
     "db:generate": "pnpm --filter @abs/schema db:generate",
     "db:migrate": "pnpm --filter @abs/schema db:migrate"
   },

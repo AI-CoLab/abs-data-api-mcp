@@ -9,6 +9,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "report:delta": "tsx src/bin/delta.ts",
+    "report:sparsity": "tsx src/bin/sparsity.ts",
+    "generate:contract": "tsx src/bin/generate-contract.ts",
     "build:artifact": "tsx src/bin/artifact.ts"
   },
   "dependencies": {

@@ -4,7 +4,9 @@ packages:
 # better-sqlite3 needs its native binding compiled; esbuild backs tsx.
 allowBuilds:
   better-sqlite3: true
+  core-js-pure: set this to true or false
   esbuild: true
+  vue-demi: set this to true or false
 
 minimumReleaseAgeExclude:
   - miniflare@5.20260907.0-alpha
