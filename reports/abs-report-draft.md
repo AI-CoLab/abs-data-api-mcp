@@ -47,12 +47,15 @@ Testing each flow's real key set against the cross-product of its options:
 | | Flows |
 |---|---|
 | Exact cross-product (every combination exists) | 130 |
-| Cross-product once dimensions that are *functions of another* are removed | 936 |
-| Not reducible to a rule at this depth | 161 |
+| Cross-product once dimensions that are *functions of another* are removed — each dependency verified in the key set | 809 |
+| Not reducible to a single-dimension dependency | 288 |
 
-96.4% of all confirmed series sit in flows whose sparsity is fully explained.
-The dominant mechanism: `STATE` is determined by `REGION` (565 flows);
-`REGION_TYPE` and `STATE` together by the region code (a further 211).
+81.0% of all confirmed series sit in flows whose sparsity is fully explained
+and verified. The mechanism is almost entirely geographic: `STATE` is
+determined by the region code in 776 flows (`REGION`, `LGA_2016`,
+`ASGS_2016`), `REGION_TYPE` likewise in 291, often both at once. The remaining
+288 flows (19% of series) do not follow a single-dimension rule; their
+sparsity has some other cause we cannot infer from the outside.
 
 Example — `C21_G09_SAL`: 220 million combinations implied; 24,409,680 exist —
 which is exactly `AGEP(10) × BPLP(53) × SEXP(3) × REGION(15,352)` once `STATE`

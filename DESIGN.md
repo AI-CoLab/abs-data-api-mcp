@@ -204,29 +204,38 @@ measured the same corpus by different routes and agree everywhere.
 ### 2.11 Structured sparsity (analysed 2026-09-09)
 
 Is the 96% of "missing" combinations principled or arbitrary? Tested per flow
-against the observed key set (`reports/sparsity.md`):
+against the observed key set (`reports/sparsity.md`). Three levels: the
+cross-product test (exact, free); arithmetic inference of dependent dimensions
+(which cardinalities divide the option product down to the exact series count);
+and **verification of every inference against the actual keys** — a dependency
+counts only if every code of some driving dimension co-occurs with exactly one
+code of the dependent one. Nothing is classed as explained on arithmetic alone.
 
 | Classification | Flows | Meaning |
 |---|---|---|
 | Exact cross-product of observed options | 130 | every combination exists |
-| Explained by dependent dimensions | **936** | the key set is the cross-product once dimensions that are functions of another are removed |
-| Unexplained at this depth | 161 | |
+| Dependent dimensions, **verified** | **809** | the key set is the cross-product once dimensions that are functions of another are removed; each dependency checked in the keys |
+| Unexplained | 288 | 161 never matched a rule; **127 matched arithmetically and failed verification** |
 
-**96.4% of all confirmed series** sit in flows whose sparsity is fully explained.
-The dominant mechanism is hierarchical geography encoded as separate dimensions:
-`STATE` is determined by `REGION` in 565 flows; `REGION_TYPE`+`STATE` in a
-further 211. Worked example: `C21_G09_SAL` = 10 × 53 × 3 × 15,352 = 24,409,680
-series exactly once `STATE` is dropped.
+**81.0% of all confirmed series** sit in flows whose sparsity is fully explained
+and verified. The mechanism is almost entirely hierarchical geography encoded as
+separate dimensions: 806 of the 809 verified flows involve only `STATE` and/or
+`REGION_TYPE` determined by the region code (`STATE←REGION` in 664 flows,
+`STATE←LGA_2016` 62, `STATE←ASGS_2016` 50, …). The three non-geography
+dependencies are tiny: `EXP_IMP←DATA_ITEM` (BOP_GOODS), `TSEST←MODELLERS_DB`,
+`TSEST←MEASURE`. Worked example: `C21_G09_SAL` = 10 × 53 × 3 × 15,352 =
+24,409,680 series exactly once `STATE` is dropped — verified.
 
-**Caveat on level 1.** The dependency inference is arithmetic: it finds the
-smallest dimension set whose cardinalities divide the product down to the exact
-series count. For geography (`STATE`, `REGION_TYPE`) that is structurally
-certain — each region has one state and one type. For a handful of patterns
-(`AGEP`, `BEDD`, `MEASURE` appearing as "dependent") a divisor coincidence is the
-likelier explanation. Level-2 verification against the key index confirms each
-case individually; it was too slow at the first attempt and is queued as a
-bounded follow-up. Until then, treat the geography patterns as established and
-the others as candidates.
+**Correction (2026-09-09, full level-2 run, 16 minutes over 599M keys).** The
+first analysis reported 936 explained flows and 96.4% of series. That figure
+rested on the arithmetic inference alone. Verification rejected 127 of the 936
+(95.6M series): every non-geography "dependent dimension" it had proposed —
+`AGEP` (47 flows), `AGE` (19), `MEASURE` (12), `BEDD` (8), `OCCP` (7), … — was a
+divisor coincidence, e.g. a 10-code age dimension where a tenth of the
+combinations happen to be absent for unrelated reasons. The corrected figures
+are the ones in the table. The 288 unexplained flows (118M series, 19%) are
+where ABS's sparsity is not reducible to a single-dimension functional
+dependency; what governs them is an open question for the ABS report.
 
 Two consequences. For ABS: the fix to the metadata is to *declare the
 dependency*, not to change the marginals (which are already exact, 2.10). For
@@ -573,7 +582,7 @@ Done (2026-09-08 → 09):
 1. ✔ Workspace, Drizzle schema, structural crawler — structural crawl in 68s.
 2. ✔ Observed probe with OR-group splitting, stall watchdog, sharded dedupe —
    all 1,227 flows, 621,536,714 series, 399GB local catalogue.
-3. ✔ Delta report (513 findings), sparsity analysis (96.4% explained),
+3. ✔ Delta report (513 findings), sparsity analysis (81.0% verified-explained, see 2.11),
    corrected OpenAPI document, drafted ABS report (`reports/`).
 4. ✔ Search-first artifact published.
 5. ✔ Contract generator → `@abs/contract` + D1 import (3.9M rows, 185MB SQL).
@@ -621,9 +630,11 @@ Done (2026-09-08 → 09):
     the same JSON, so `invalidSelectionFromError` works for RPC and the Code
     Mode sandbox alike). Protocol suite: 6 RPC checks, all passing live.
 
+14. ✔ Level-2 sparsity verification over every level-1 candidate: 809 of 936
+    hold, all but three geographic; 127 were divisor coincidences. Headline
+    corrected from 96.4% to **81.0%** of series explained (2.11).
+
 Remaining, in order:
 
-14. Level-2 sparsity verification over every level-1 candidate (2.11 caveat) —
-    running; the first bounded sample confirmed only geography dependencies.
 16. Rate limiting, last (decision 22) — with `execute` as the primary reason.
 17. Exposure decisions when ready: repo public, ABS report, registry listing.

@@ -23,8 +23,10 @@ that only ever offer what exists.
   14,761,557,818 — a density of **4.21%**, overstated **23.8×**.
 - The per-dimension metadata is **exact**: every advertised option exists, and
   nothing real is unadvertised. The entire overstatement is combinatorial.
-- **96.4%** of that sparsity is principled: hierarchical geography encoded as
-  separate dimensions (`STATE` is a function of `REGION` in 565 flows).
+- **81.0%** of series sit in flows whose sparsity is principled and verified in
+  the keys — almost entirely hierarchical geography encoded as separate
+  dimensions (`STATE` is a function of `REGION` in 664 flows). The remaining
+  19% is not reducible to a single-dimension dependency.
 - `detail=serieskeysonly` — the endpoint that should answer "what exists" — is
   broken (HTTP 200, malformed JSON). Eight of fifteen documented behaviours do
   not conform. See `reports/`.
