@@ -12,7 +12,8 @@
  * combination checks live against ABS (decision 24). Cache-first (decision 22).
  */
 import { createMcpHandler } from "@modelcontextprotocol/server";
-import { MANIFEST } from "@abs/contract";
+import { BRANDED_CODELISTS, LITERAL_CODELISTS, MANIFEST, TABLES } from "@abs/contract";
+import * as options from "@abs/contract/generated";
 import type { Env } from "./env.ts";
 import { Catalogue } from "./catalogue.ts";
 import { buildMcpServer } from "./mcp.ts";
@@ -38,6 +39,31 @@ export default {
       const response = await handler.fetch(request);
       ctx.waitUntil(handler.close());
       return response;
+    }
+
+    // The menu as one document — the equivalent of the OpenAPI spec in
+    // Cloudflare's two-tool Code Mode: every table, its key structure and
+    // coverage, and every small-dimension option with labels (~2MB). Humans grep
+    // it; the planned Code Mode `search` tool will read it in a no-network
+    // isolate. Large dimensions list their codelist and size; their options are
+    // reached through search_options. Cached for a day: it changes per crawl.
+    // Must precede the generic /api branch, which would otherwise claim it.
+    if (url.pathname === "/api/catalogue.json") {
+      const literal: Record<string, unknown> = {};
+      for (const id of LITERAL_CODELISTS) {
+        literal[id] = (options as Record<string, unknown>)[id.replace(/[^A-Za-z0-9_]/g, "_")];
+      }
+      return json(
+        {
+          provenance: { runId: MANIFEST.runId, observedAt: MANIFEST.observedAt },
+          corpus: MANIFEST.corpus,
+          verbs: `${url.origin}/api/openapi.json`,
+          tables: TABLES,
+          options: { literal, branded: BRANDED_CODELISTS },
+        },
+        200,
+        86_400,
+      );
     }
 
     if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
@@ -71,6 +97,7 @@ export default {
           api: `${url.origin}/api/tables`,
           docs: `${url.origin}/api/docs`,
           openapi: `${url.origin}/api/openapi.json`,
+          catalogue: `${url.origin}/api/catalogue.json`,
         },
       });
     }
