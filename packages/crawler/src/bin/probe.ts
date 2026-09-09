@@ -86,6 +86,11 @@ function dropKeyValueIndex(): void {
 
 function rebuildKeyValueIndex(): void {
   const started = Date.now();
+  // The crawl's bulk pragmas set temp_store = MEMORY, which is right for
+  // writes but fatal here: indexing ~2B rows external-sorts tens of GB of
+  // temp data, and holding that in native memory got the process killed by
+  // the OS with no output at all. File-backed temp for the sort.
+  rt.sqlite.pragma("temp_store = FILE");
   rt.sqlite.exec(
     `CREATE INDEX IF NOT EXISTS series_key_value_lookup_idx
      ON series_key_value (dimension_id, code_id)`,
