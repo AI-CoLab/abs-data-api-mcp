@@ -6,7 +6,7 @@
 import { implement } from "@orpc/server";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
-import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
+import { ZodToJsonSchemaConverter, experimental_ZodSmartCoercionPlugin } from "@orpc/zod/zod4";
 import { httpContract } from "@abs/contract/http";
 import { MANIFEST } from "@abs/contract";
 import type { Catalogue } from "./catalogue.ts";
@@ -66,6 +66,9 @@ export const OPENAPI_INFO = {
 
 export const httpHandler = new OpenAPIHandler(router, {
   plugins: [
+    // Query strings arrive as text; coerce "limit=3" to the schema's number so
+    // GET /api/tables?limit=3 validates instead of 400ing.
+    new experimental_ZodSmartCoercionPlugin(),
     new OpenAPIReferencePlugin({
       schemaConverters: [new ZodToJsonSchemaConverter()],
       specGenerateOptions: { info: OPENAPI_INFO, servers: [{ url: "/api" }] },

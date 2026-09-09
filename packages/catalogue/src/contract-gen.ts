@@ -329,7 +329,11 @@ export function generateContract(sqlite: Database, opts: GenerateOptions): Gener
     return `'${String(v).replace(/'/g, "''")}'`;
   };
 
+  // D1 rejects long statements (SQLITE_TOOBIG): declared_flow's descriptions
+  // pushed a 250-row INSERT past the limit while short-row tables sailed
+  // through. Cap each statement by bytes as well as rows.
   const ROWS_PER_INSERT = 250;
+  const MAX_STATEMENT_BYTES = 64 * 1024;
   const MAX_FILE_BYTES = 90 * 1024 * 1024;
 
   let fileIndex = 10;
@@ -344,6 +348,7 @@ export function generateContract(sqlite: Database, opts: GenerateOptions): Gener
     let buf: string[] = [];
     let bufBytes = 0;
     let batch: string[] = [];
+    let batchBytes = 0;
     let tableRows = 0;
 
     const flushBatch = () => {
@@ -352,6 +357,7 @@ export function generateContract(sqlite: Database, opts: GenerateOptions): Gener
       buf.push(stmt);
       bufBytes += stmt.length;
       batch = [];
+      batchBytes = 0;
     };
     const flushFile = () => {
       if (buf.length === 0) return;
@@ -364,7 +370,10 @@ export function generateContract(sqlite: Database, opts: GenerateOptions): Gener
     };
 
     for (const row of iter) {
-      batch.push(`(${row.map(sqlLiteral).join(", ")})`);
+      const tuple = `(${row.map(sqlLiteral).join(", ")})`;
+      if (batch.length > 0 && batchBytes + tuple.length > MAX_STATEMENT_BYTES) flushBatch();
+      batch.push(tuple);
+      batchBytes += tuple.length;
       tableRows += 1;
       if (batch.length >= ROWS_PER_INSERT) flushBatch();
       if (bufBytes >= MAX_FILE_BYTES) flushFile();

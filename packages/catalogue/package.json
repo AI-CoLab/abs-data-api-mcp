@@ -11,10 +11,15 @@
     "report:delta": "tsx src/bin/delta.ts",
     "report:sparsity": "tsx src/bin/sparsity.ts",
     "generate:contract": "tsx src/bin/generate-contract.ts",
+    "emit:openapi": "tsx src/bin/openapi.ts",
     "build:artifact": "tsx src/bin/artifact.ts"
   },
   "dependencies": {
+    "@abs/contract": "workspace:*",
     "@abs/schema": "workspace:*",
+    "@orpc/contract": "^1.15.0",
+    "@orpc/openapi": "^1.15.0",
+    "@orpc/zod": "^1.15.0",
     "drizzle-orm": "^0.44.5",
     "zod": "^4.1.5"
   },

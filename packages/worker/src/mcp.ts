@@ -10,7 +10,12 @@
  * options for the offending dimension; the client answers and retries the same
  * call. That turns "wrong option" into a one-step correction.
  */
-import { McpServer, acceptedContent, inputRequired } from "@modelcontextprotocol/server";
+import {
+  CLIENT_CAPABILITIES_META_KEY,
+  McpServer,
+  acceptedContent,
+  inputRequired,
+} from "@modelcontextprotocol/server";
 import {
   MANIFEST,
   describeTableInputSchema,
@@ -129,8 +134,17 @@ export function buildMcpServer(d1: D1Database): McpServer {
       if (resolved.ok) return jsonResult(await fetchData(resolved.value, { ...input, select }));
 
       const err = resolved.error;
-      // Correctable in one round trip: ask for a valid option for the dimension.
-      if (err.dimension && (err.reason === "unknown_option" || err.reason === "no_data_for_combination")) {
+      // Correctable in one round trip: ask for a valid option for the dimension —
+      // but only if the client can take an input request. A client without form
+      // elicitation gets the same facts as a typed error instead of a protocol
+      // error (the SDK rejects input_required for such clients).
+      // The SDK lifts the envelope keys out of _meta into mcpReq.envelope, keyed
+      // by their raw meta names — the same place its own capability check reads.
+      type Caps = { elicitation?: { form?: unknown } } | undefined;
+      const envelope = ctx.mcpReq.envelope as Record<string, unknown> | undefined;
+      const caps = envelope?.[CLIENT_CAPABILITIES_META_KEY] as Caps;
+      const canElicit = caps?.elicitation?.form !== undefined;
+      if (canElicit && err.dimension && (err.reason === "unknown_option" || err.reason === "no_data_for_combination")) {
         const codes = (err.validOptions ?? []).map((o) => o.code);
         const labels = (err.validOptions ?? []).map((o) => (o.label ? `${o.code} = ${o.label}` : o.code));
         return inputRequired({

@@ -7,7 +7,7 @@
  */
 import { readCsvTable, maxPeriod, minPeriod } from "@abs/schema";
 import type { GetDataInput, GetDataOutput, Observation } from "@abs/contract";
-import { ABS_BASE } from "./env.ts";
+import { ABS_BASE, absHeaders } from "./env.ts";
 import { availabilityUrl } from "./availability.ts";
 import { provenance } from "./catalogue.ts";
 import type { ResolvedSelection } from "./resolve.ts";
@@ -32,7 +32,7 @@ export async function fetchData(resolved: ResolvedSelection, input: GetDataInput
   };
 
   const url = dataUrl(resolved.table, resolved.key, query);
-  const request = new Request(url, { headers: { accept: DATA_CSV, "accept-encoding": "gzip" } });
+  const request = new Request(url, { headers: absHeaders(DATA_CSV) });
 
   const cache = caches.default;
   let response = await cache.match(request);

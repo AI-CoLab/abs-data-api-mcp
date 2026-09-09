@@ -9,7 +9,7 @@
  *
  * `references=none` triggers a 500 on this endpoint — never pass it.
  */
-import { ABS_BASE } from "./env.ts";
+import { ABS_BASE, absHeaders } from "./env.ts";
 
 const STRUCTURE_JSON = "application/vnd.sdmx.structure+json;version=1.0";
 const CACHE_TTL_SECONDS = 3600;
@@ -37,7 +37,7 @@ export function availabilityUrl(table: string, key: string): string {
 
 export async function checkAvailability(table: string, key: string): Promise<Availability> {
   const url = availabilityUrl(table, key);
-  const request = new Request(url, { headers: { accept: STRUCTURE_JSON, "accept-encoding": "gzip" } });
+  const request = new Request(url, { headers: absHeaders(STRUCTURE_JSON) });
 
   const cache = caches.default;
   let response = await cache.match(request);
@@ -50,9 +50,21 @@ export async function checkAvailability(table: string, key: string): Promise<Ava
     }
   }
 
-  if (!response.ok) return { exists: false, available: {}, upperBound: 0, url };
+  if (!response.ok) {
+    // An upstream failure must never masquerade as "does not exist": log it so
+    // a fail-closed answer is visible as an incident rather than a data fact.
+    const snippet = (await response.text().catch(() => "")).slice(0, 200);
+    console.warn(`availableconstraint upstream ${response.status} for ${url}: ${snippet}`);
+    return { exists: false, available: {}, upperBound: 0, url };
+  }
 
-  const payload = (await response.json()) as ConstraintPayload;
+  let payload: ConstraintPayload;
+  try {
+    payload = (await response.json()) as ConstraintPayload;
+  } catch (err) {
+    console.warn(`availableconstraint unparseable for ${url}: ${String(err)}`);
+    return { exists: false, available: {}, upperBound: 0, url };
+  }
   const keyValues = payload.data?.contentConstraints?.[0]?.cubeRegions?.[0]?.keyValues ?? [];
 
   const available: Record<string, string[]> = {};

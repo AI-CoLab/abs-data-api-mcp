@@ -130,6 +130,34 @@ export const ENDPOINT_CASES: EndpointCase[] = [
   },
 ];
 
+/**
+ * Undocumented gate discovered when the Worker first called upstream: requests
+ * without a User-Agent are answered 403 with a CloudFront HTML page — not an
+ * SDMX error, not mentioned anywhere in the user guide or the OpenAPI spec.
+ * Checked outside AbsClient because the client always identifies itself.
+ */
+export async function checkUserAgentGate(): Promise<CheckResult> {
+  const url = "https://data.api.abs.gov.au/rest/availableconstraint/CPI/all/ABS";
+  const started = performance.now();
+  const res = await fetch(url, {
+    headers: { accept: ACCEPT.structureJson, "user-agent": "" },
+  });
+  const text = await res.text();
+  const durationMs = Math.round(performance.now() - started);
+  const isHtml403 = res.status === 403 && /<!DOCTYPE HTML/i.test(text);
+  return {
+    label: "request without User-Agent",
+    url,
+    documentedBehaviour: "No User-Agent requirement is documented; the API is described as open and keyless",
+    httpStatus: res.status,
+    verdict: res.ok ? "conforms" : "broken",
+    detail: isHtml403
+      ? "HTTP 403 with a CloudFront HTML error page (not an SDMX error) when User-Agent is absent"
+      : `HTTP ${res.status}`,
+    durationMs,
+  };
+}
+
 export interface CheckResult {
   label: string;
   url: string;
@@ -183,6 +211,7 @@ export async function runEndpointChecks(
     }
   }
 
+  results.push(await checkUserAgentGate());
   return results;
 }
 
