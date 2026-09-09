@@ -34,6 +34,8 @@ import { resolveSelection } from "./resolve.ts";
 import { fetchData } from "./abs-data.ts";
 import { registerResources } from "./resources.ts";
 import { registerPrompts } from "./prompts.ts";
+import { registerCodeMode } from "./codemode.ts";
+import type { Env } from "./env.ts";
 
 const NAME = "abs-data";
 const VERSION = MANIFEST.runId;
@@ -53,8 +55,8 @@ function errorResult(error: InvalidSelection) {
   };
 }
 
-export function buildMcpServer(d1: D1Database): McpServer {
-  const catalogue = new Catalogue(d1);
+export function buildMcpServer(env: Env, ctx: ExecutionContext): McpServer {
+  const catalogue = new Catalogue(env.CATALOGUE);
   // Cache hints for the 2026-07-28 cacheable results: the surface changes only
   // per crawl, so shared caches may hold tools/list for a day (decision 22).
   const server = new McpServer({ name: NAME, version: VERSION }, { cacheHints: MCP_CACHE_HINTS });
@@ -184,6 +186,7 @@ export function buildMcpServer(d1: D1Database): McpServer {
 
   registerResources(server, catalogue);
   registerPrompts(server);
+  registerCodeMode(server, env, ctx);
   return server;
 }
 

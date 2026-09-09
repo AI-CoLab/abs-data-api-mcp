@@ -158,6 +158,7 @@ export const getDataOutputSchema = z.object({
   table: z.string(),
   key: z.string().describe("The resolved selection as an SDMX key"),
   seriesMatched: z.number().int(),
+  /** Sorted by series key, then period ascending. */
   rows: z.array(observationSchema),
   rowsReturned: z.number().int(),
   truncated: z.boolean(),

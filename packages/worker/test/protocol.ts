@@ -85,7 +85,8 @@ check(JSON.stringify(discover).includes("2026-07-28"), "advertises protocol 2026
 process.stdout.write("tools/list\n");
 const list = await rpc("tools/list");
 const names = (list.tools as Array<{ name: string }>).map((t) => t.name).sort();
-check(JSON.stringify(names) === JSON.stringify(["describe_table", "get_data", "search_options", "search_tables"]), `exactly the four fixed verbs (${names.join(", ")})`);
+check(["describe_table", "get_data", "search_options", "search_tables"].every((n) => names.includes(n)), `the four fixed verbs are present (${names.join(", ")})`);
+check(names.length === 6 && names.includes("search") && names.includes("execute"), "plus the two Code Mode tools, nothing else");
 check(typeof list.ttlMs === "number" && list.ttlMs > 0, `cacheable: ttlMs=${list.ttlMs}`);
 check(list.cacheScope === "public", `cacheable: cacheScope=${list.cacheScope}`);
 check(list.tools.every((t: any) => t.inputSchema && t.outputSchema), "every tool has input and output schemas");
@@ -167,6 +168,38 @@ const retried = (await callTool(
   { inputResponses: { REGION: { action: "accept", content: { value: "50" } } } },
 )).structuredContent;
 check(retried?.key?.endsWith(".50.") || retried?.key?.includes(".50."), `retry with inputResponses resolves (${retried?.key})`);
+
+// ------------------------------------------------------------- Code Mode
+process.stdout.write("code mode: search\n");
+const listNow = await rpc("tools/list");
+const hasCodeMode = (listNow.tools as Array<{ name: string }>).some((t) => t.name === "execute");
+check(hasCodeMode, "search and execute tools are registered");
+const cmSearch = await callTool("search", {
+  code: "const t = catalogue.tables.CPI; return { dims: t.dimensions.map(d => d.id), tables: Object.keys(catalogue.tables).length, sa2Quarterly: Object.values(catalogue.tables).filter(x => x.geography === 'SA2' && x.frequencies.includes('Q')).length };",
+});
+const cmSearchOut = JSON.parse(cmSearch.content?.[0]?.text ?? "{}");
+if (cmSearchOut.error && /unavailable/.test(cmSearchOut.error)) {
+  process.stdout.write(`  skip Code Mode unavailable on this deployment: ${cmSearchOut.error}\n`);
+} else {
+  check(cmSearchOut.ok === true && cmSearchOut.result?.tables === 1227, `search runs model code over the catalogue (${JSON.stringify(cmSearchOut.result)})`);
+  check(JSON.stringify(cmSearchOut.result?.dims) === JSON.stringify(["MEASURE", "INDEX", "TSEST", "REGION", "FREQ"]), "search sees CPI's key order");
+
+  process.stdout.write("code mode: execute\n");
+  const cmExec = await callTool("execute", {
+    code: "const d = await abs.getData({ table: 'CPI', select: { MEASURE: '1', INDEX: '10001', TSEST: '10', REGION: '50', FREQ: 'Q' }, lastN: 5 }); const v = d.rows.map(r => r.value); console.log('rows', v.length); return { key: d.key, latest: v[v.length-1], change: v[v.length-1] - v[0] };",
+  });
+  const cmExecOut = JSON.parse(cmExec.content?.[0]?.text ?? "{}");
+  check(cmExecOut.ok === true && cmExecOut.result?.key === "1.10001.10.50.Q" && typeof cmExecOut.result?.latest === "number", `execute fetches and computes inside the sandbox (${JSON.stringify(cmExecOut.result)})`);
+  check(Array.isArray(cmExecOut.logs) && cmExecOut.logs[0] === "rows 5", "console.log is captured");
+
+  const cmBad = await callTool("execute", { code: "try { await abs.getData({ table: 'CPI', select: { REGION: 'Atlantis' } }); return 'no error'; } catch (e) { return JSON.parse(e.message).reason; }" });
+  const cmBadOut = JSON.parse(cmBad.content?.[0]?.text ?? "{}");
+  check(cmBadOut.result === "unknown_option", `validation errors are catchable JSON in the sandbox (${cmBadOut.result})`);
+
+  const cmNet = await callTool("execute", { code: "try { await fetch('https://example.com'); return 'network allowed'; } catch (e) { return 'blocked'; }" });
+  const cmNetOut = JSON.parse(cmNet.content?.[0]?.text ?? "{}");
+  check(cmNetOut.result === "blocked", `outbound network is blocked in the sandbox (${cmNetOut.result})`);
+}
 
 // -------------------------------------------------------- resources/prompts
 process.stdout.write("resources\n");

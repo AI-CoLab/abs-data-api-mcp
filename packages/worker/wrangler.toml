@@ -18,6 +18,11 @@ database_id = "38885996-8b80-45a2-8f29-51268a8274a4"
 binding = "RAW_ARCHIVE"
 bucket_name = "abs-raw-archive"
 
+# Code Mode (decision 21): model-written JavaScript runs in fresh isolates whose
+# only capability is our validated client; outbound network is blocked.
+[[worker_loaders]]
+binding = "LOADER"
+
 [observability]
 enabled = true
 

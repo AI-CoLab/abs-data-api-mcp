@@ -5,7 +5,7 @@
  * costs at most `maxRows` rows of parsing rather than 40MB of context. The
  * complete pull is offered as a URL instead.
  */
-import { readCsvTable, maxPeriod, minPeriod } from "@abs/schema";
+import { comparePeriods, readCsvTable, maxPeriod, minPeriod } from "@abs/schema";
 import type { GetDataInput, GetDataOutput, Observation } from "@abs/contract";
 import { ABS_BASE, absHeaders } from "./env.ts";
 import { availabilityUrl } from "./availability.ts";
@@ -87,6 +87,11 @@ export async function fetchData(resolved: ResolvedSelection, input: GetDataInput
       if (truncated) await response.body.cancel().catch(() => undefined);
     }
   }
+
+  // ABS returns observations in no useful order (2024-Q1, 2025-Q3, 2025-Q2 …).
+  // Guarantee series-then-period ascending so `rows[0]` and `rows.at(-1)` mean
+  // what a reader — or model-written code — assumes they mean.
+  rows.sort((a, b) => a.series.localeCompare(b.series) || comparePeriods(a.period, b.period));
 
   return {
     table: resolved.table,

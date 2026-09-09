@@ -1,6 +1,8 @@
 export interface Env {
   CATALOGUE: D1Database;
   RAW_ARCHIVE: R2Bucket;
+  /** Worker Loader (Dynamic Workers, open beta). Absent when the account lacks it. */
+  LOADER?: WorkerLoader;
 }
 
 export const ABS_BASE = "https://data.api.abs.gov.au/rest";

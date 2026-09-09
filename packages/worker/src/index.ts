@@ -17,6 +17,9 @@ import * as options from "@abs/contract/generated";
 import type { Env } from "./env.ts";
 import { Catalogue } from "./catalogue.ts";
 import cataloguePage from "../../../artifact/abs-cartography.html";
+
+// Named entrypoint handed to Code Mode sandboxes via ctx.exports (decision 21).
+export { AbsToolsEntrypoint } from "./codemode.ts";
 import { buildMcpServer } from "./mcp.ts";
 import { httpHandler } from "./http.ts";
 
@@ -36,7 +39,7 @@ export default {
     if (url.pathname === "/mcp") {
       // The SDK's own Web-standard handler (it ships a workerd provider): one
       // McpServer per request, no session.
-      const handler = createMcpHandler(() => buildMcpServer(env.CATALOGUE));
+      const handler = createMcpHandler(() => buildMcpServer(env, ctx));
       const response = await handler.fetch(request);
       ctx.waitUntil(handler.close());
       return response;
