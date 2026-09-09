@@ -20,3 +20,10 @@ bucket_name = "abs-raw-archive"
 
 [observability]
 enabled = true
+
+# The catalogue page is the artifact HTML, imported as text and served at
+# /catalogue. On this origin the page can call the HTTP door and goes live.
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true

@@ -550,6 +550,26 @@
   const T = DATA.totals;
   const probed = T.flows - T.flowsUnprobed;
 
+  // Live mode: when served from the Worker's own origin, the page can call the
+  // HTTP door — fresh coverage per table, option search across every code, and
+  // real latest values. On claude.ai the artifact CSP blocks fetch, so the page
+  // stays the static snapshot it was built as. Detected once, at load.
+  let LIVE = false;
+  const api = (path) => fetch(path, { headers: { accept: "application/json" } }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+  const liveReady = (async () => {
+    try {
+      const h = await api("/healthz");
+      LIVE = !!(h && h.ok);
+    } catch { LIVE = false; }
+    if (LIVE) {
+      const badge = document.createElement("span");
+      badge.className = "tag ok";
+      badge.textContent = "live · queries the front door";
+      badge.style.marginLeft = "8px";
+      document.querySelector(".masthead h1")?.appendChild(badge);
+    }
+  })();
+
   // ------------------------------------------------------------ stat strip
   const stats = [
     { k: "dataflows", v: fmt(T.flows) },
@@ -787,7 +807,69 @@
           <div class="urlbox"><code>${esc(availUrl)}</code>
             <button class="copy" type="button" data-copy="${esc(availUrl)}">Copy</button></div>
         </div>
+
+        <div class="field" id="live-panel" hidden>
+          <span class="eyebrow">Live &mdash; from the front door</span>
+          <div class="row-meta" id="live-status"></div>
+          <label class="search" style="flex:none">
+            <span class="eyebrow">Find an option</span>
+            <select id="live-dim" style="border:0;background:none;color:inherit;font:inherit">
+              ${f.dims.map((d) => `<option value="${esc(d[0])}">${esc(d[0])} (${fmt(d[3])})</option>`).join("")}
+            </select>
+            <input id="live-q" type="search" placeholder="label or code" autocomplete="off">
+          </label>
+          <div class="row-meta" id="live-options"></div>
+          <div>
+            <button class="copy" type="button" id="live-latest">Show latest values (12 series)</button>
+          </div>
+          <div class="scroll-x" id="live-values"></div>
+        </div>
       </div>`;
+
+    liveReady.then(() => { if (LIVE) wireLive(f); });
+  }
+
+  function wireLive(f) {
+    const panel = $("live-panel");
+    if (!panel) return;
+    panel.hidden = false;
+    const status = $("live-status");
+
+    api(`/api/tables/${encodeURIComponent(f.id)}`).then((d) => {
+      status.innerHTML =
+        `<span class="tag ok">observed ${esc(d.provenance.runId)}</span>` +
+        `<span class="tag">${fmt(d.table.seriesCount)} series</span>` +
+        (d.table.coverage.from ? `<span class="tag">${esc(d.table.coverage.from)} → ${esc(d.table.coverage.to)}</span>` : "");
+    }).catch(() => { status.innerHTML = `<span class="tag empty">front door unavailable</span>`; });
+
+    const runOptionSearch = () => {
+      const dim = $("live-dim").value; const q = $("live-q").value.trim();
+      if (q.length < 2) { $("live-options").innerHTML = ""; return; }
+      api(`/api/tables/${encodeURIComponent(f.id)}/dimensions/${encodeURIComponent(dim)}/options?query=${encodeURIComponent(q)}&limit=12`)
+        .then((r) => {
+          $("live-options").innerHTML = r.options.length
+            ? r.options.map((o) => `<span class="tag" title="${esc(o.code)}">${esc(o.code)} = ${esc(o.label ?? "")}</span>`).join("") +
+              (r.total > r.options.length ? `<span class="tag">+${fmt(r.total - r.options.length)} more</span>` : "")
+            : `<span class="tag empty">no observed option matches</span>`;
+        })
+        .catch(() => { $("live-options").innerHTML = `<span class="tag empty">lookup failed</span>`; });
+    };
+    let t; $("live-q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(runOptionSearch, 250); });
+    $("live-dim").addEventListener("change", runOptionSearch);
+
+    $("live-latest").addEventListener("click", async () => {
+      $("live-values").innerHTML = `<span class="density-text">fetching from ABS via the front door…</span>`;
+      try {
+        const r = await fetch("/api/data", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ table: f.id, select: {}, lastN: 1, maxRows: 12 }),
+        }).then((x) => x.json());
+        if (!r.rows) { $("live-values").innerHTML = `<span class="tag empty">${esc(r.data?.message ?? r.message ?? "no data")}</span>`; return; }
+        $("live-values").innerHTML = `<table class="dims"><thead><tr><th>Series key</th><th>Period</th><th>Value</th><th>Unit</th></tr></thead><tbody>` +
+          r.rows.map((o) => `<tr><td class="dim-id">${esc(o.series)}</td><td>${esc(o.period)}</td><td class="num">${o.value ?? "—"}</td><td class="codes">${esc(o.unit ?? "")}</td></tr>`).join("") +
+          `</tbody></table><span class="density-text">${fmt(r.seriesMatched)} series in this sample${r.truncated ? " (capped)" : ""} · <a href="${esc(r.fullDataUrl)}">full pull</a></span>`;
+      } catch (e) { $("live-values").innerHTML = `<span class="tag empty">fetch failed</span>`; }
+    });
   }
 
   document.addEventListener("click", async (e) => {

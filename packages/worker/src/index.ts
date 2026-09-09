@@ -16,6 +16,7 @@ import { BRANDED_CODELISTS, LITERAL_CODELISTS, MANIFEST, TABLES } from "@abs/con
 import * as options from "@abs/contract/generated";
 import type { Env } from "./env.ts";
 import { Catalogue } from "./catalogue.ts";
+import cataloguePage from "../../../artifact/abs-cartography.html";
 import { buildMcpServer } from "./mcp.ts";
 import { httpHandler } from "./http.ts";
 
@@ -84,6 +85,13 @@ export default {
 
     if (url.pathname === "/healthz") return json({ ok: true, runId: MANIFEST.runId }, 200, 0);
 
+    // The browsable catalogue, live on this origin (it detects it can call /api).
+    if (url.pathname === "/catalogue") {
+      return new Response(cataloguePage, {
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=3600" },
+      });
+    }
+
     if (url.pathname === "/") {
       return json({
         service: "abs-data-front-door",
@@ -98,6 +106,7 @@ export default {
           docs: `${url.origin}/api/docs`,
           openapi: `${url.origin}/api/openapi.json`,
           catalogue: `${url.origin}/api/catalogue.json`,
+          browse: `${url.origin}/catalogue`,
         },
       });
     }
