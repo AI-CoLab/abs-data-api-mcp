@@ -446,6 +446,48 @@ hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
     - `packages/worker` — MCP front door
     Keeps boundaries clean and stops the Worker bundling crawler code.
 
+### Phase 2 decisions (2026-09-09, after cartography completed)
+
+24. **7a resolved — live oracle + observed marginals in D1.** The combination
+    set is 621M series (~150GB with indexes), 60× D1's ceiling. D1 carries the
+    observed per-dimension options (~700k rows, proven exactly correct in 2.10)
+    for dropdowns and search; the exact combination check is
+    `availableconstraint` at call time (proven to agree with the probe on every
+    dimension of every flow). The full key set stays local as the research
+    corpus and change-detection baseline. Observed-only holds: both sources are
+    empirical, neither is the declared cross-product.
+25. **Contract artifact:** `packages/contract`, regenerated per crawl and
+    committed. Stable hand-written Zod for the generic verbs; a generated data
+    module of every table, its dimensions, coverage, and option types —
+    literal unions for dimensions with ≤64 codes, branded strings for larger
+    ones; run-ID stamped. Doors import it at build time; D1 carries the same
+    data at runtime. The corrected OpenAPI document is emitted from the oRPC
+    contract into `reports/`.
+26. **`get_data` payload policy:** labelled rows capped (default 500
+    observations), a summary (series count, period range, units), and the
+    exact working ABS URL for the full pull; defaults to `lastNObservations`
+    when unspecified. Large analytical pulls belong to Code Mode.
+27. **HTTP door framework: oRPC** — contract-first Zod, OpenAPI 3.1, generated
+    typed client, Scalar plugin, Workers adapter.
+28. **Refresh pipeline, revised against measured scale.** The full re-probe
+    (~24h, 20GB heap for the giants, 400GB output) cannot run in a Worker. It
+    stays a **self-hosted job**, run monthly — an explicit, accepted exception
+    to the no-local-scripts goal. Everything else lives in Cloudflare,
+    including a weekly Worker cron that diffs structure/constraints and checks
+    `updatedAfter` to detect changed flows. Decisions 13/14 amended
+    accordingly.
+29. **Deployment in this phase**, to the owner's Cloudflare account: D1
+    database, R2 bucket, catalogue import, Worker deploy — doors verified live,
+    not only in the local emulator.
+30. **Phase extras:** structured-sparsity analysis (feeds compact static types
+    and the report), a drafted ABS-facing report (nothing sent without
+    approval), and a Worker-backed live version of the catalogue artifact.
+    Exact observation counts for headline flows deferred; 3a stays
+    provisional.
+31. **Verification of the MCP door:** automated protocol tests (tools/list,
+    tools/call, MRTR paths, cache fields) plus real use from a Claude Code
+    session connected to the running server.
+
 ## 4. Destination
 
 The agreed end-state (2026-09-08): one contract generated from the observed
