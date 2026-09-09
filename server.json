@@ -6,7 +6,7 @@
   "version": "0.1.0",
   "websiteUrl": "https://abs-data-front-door.aicolab.workers.dev",
   "repository": {
-    "url": "https://github.com/AI-CoLab/abs-data-api-mcp",
+    "url": "https://github.com/AI-CoLab/abs-data-mcp",
     "source": "github"
   },
   "remotes": [

@@ -1,7 +1,7 @@
 # The ABS Data API as it actually behaves — findings from a complete empirical crawl
 
 Prepared for api.data@abs.gov.au. Source and tooling:
-<https://github.com/AI-CoLab/abs-data-api-mcp>.
+<https://github.com/AI-CoLab/abs-data-mcp>.
 
 ## Summary
 
@@ -145,7 +145,7 @@ In fairness — much does, and better than documented:
   `reports/openapi.json`, also served live at
   <https://abs-data-front-door.aicolab.workers.dev/api/openapi.json>.
 - Tooling (TypeScript, open source): the crawler, conformance suite and report
-  generators at <https://github.com/AI-CoLab/abs-data-api-mcp>. The same
+  generators at <https://github.com/AI-CoLab/abs-data-mcp>. The same
   repository runs a public front door to the API that offers only what
   observation confirmed — <https://abs-data-front-door.aicolab.workers.dev> —
   which may itself be a useful illustration of what the metadata could support.

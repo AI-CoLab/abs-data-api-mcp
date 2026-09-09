@@ -649,7 +649,7 @@ Done (2026-09-08 → 09):
 Remaining:
 
 17. Exposure (go given 2026-09-09): repo public at
-    `github.com/AI-CoLab/abs-data-api-mcp` with description and topics; ABS
+    `github.com/AI-CoLab/abs-data-mcp` with description and topics; ABS
     report finalised with the corrected figures (`reports/abs-report-draft.md`,
     to be sent by the user to api.data@abs.gov.au); official MCP registry
     listing as `io.github.AI-CoLab/abs-data` (`server.json`, validated) —

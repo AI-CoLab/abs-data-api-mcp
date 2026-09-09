@@ -20,6 +20,6 @@ export const ABS_BASE = "https://data.api.abs.gov.au/rest";
 export function absHeaders(accept: string): Record<string, string> {
   return {
     accept,
-    "user-agent": "abs-data-front-door/0.1 (+https://github.com/AI-CoLab/abs-data-api-mcp)",
+    "user-agent": "abs-data-front-door/0.1 (+https://github.com/AI-CoLab/abs-data-mcp)",
   };
 }
