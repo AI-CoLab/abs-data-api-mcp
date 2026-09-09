@@ -32,9 +32,16 @@ export const coverageSchema = z.object({
   to: z.string().nullable().describe("Latest observed period"),
 });
 
+export const matchedOptionSchema = z.object({
+  dimension: z.string(),
+  code: z.string(),
+  label: z.string().nullable(),
+});
+
 export const tableSummarySchema = z.object({
   id: z.string().describe("Dataflow id, e.g. CPI"),
   name: z.string().nullable(),
+  description: z.string().nullable().optional().describe("ABS's own description, trimmed"),
   seriesCount: z.number().int().describe("Series confirmed to exist by retrieval"),
   frequencies: z.array(frequencySchema),
   coverage: coverageSchema,
@@ -44,6 +51,10 @@ export const tableSummarySchema = z.object({
   geography: z.string().nullable().describe("Geography level for family members, e.g. LGA"),
   dimensions: z.array(z.string()).describe("Dimension ids in key order"),
   topics: z.array(z.string()),
+  /** When the search term matched an option label inside a dimension rather than the table itself. */
+  matchedOptions: z.array(matchedOptionSchema).optional(),
+  /** For census families: the other geography levels the same table is published at. */
+  familyGeographies: z.array(z.string()).optional(),
 });
 export type TableSummary = z.infer<typeof tableSummarySchema>;
 

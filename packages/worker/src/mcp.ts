@@ -62,13 +62,16 @@ export function buildMcpServer(d1: D1Database): McpServer {
     {
       title: "Search ABS tables",
       description:
-        "Find ABS statistical tables (dataflows) by topic words, geography level or frequency. " +
-        "Every result is confirmed to serve data — nothing here comes from documentation alone. " +
-        "Start here, then describe_table to see how to select within one.",
+        "Find ABS statistical tables (dataflows) by topic words, geography level or frequency. Matches " +
+        "table names, topics and dimension names, and also option labels inside dimensions — a search for " +
+        "'rent' finds CPI through its INDEX option 'Rents' and reports the match in matchedOptions. Census " +
+        "tables published at several geography levels are collapsed to one result with familyGeographies " +
+        "listing the others (use the geography filter to pick one). Every result is confirmed to serve " +
+        "data — nothing here comes from documentation alone. Start here, then describe_table.",
       inputSchema: searchTablesInputSchema,
       outputSchema: searchTablesOutputSchema,
     },
-    async (input) => jsonResult(catalogue.searchTables(input)),
+    async (input) => jsonResult(await catalogue.searchTables(input)),
   );
 
   server.registerTool(

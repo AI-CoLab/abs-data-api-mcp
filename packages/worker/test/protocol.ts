@@ -93,6 +93,18 @@ check(searchOut.results.some((r: any) => r.id === "CPI"), "CPI ranks in the top 
 check(typeof searchOut.provenance?.runId === "string", "carries provenance");
 check(searchOut.results.every((r: any) => r.seriesCount > 0), "every result serves data");
 
+process.stdout.write("search_tables (option labels)\n");
+// Census tables titled "Rent (weekly) by …" legitimately outrank CPI, whose
+// "Rents" is one option among 161 — so assert presence on a page, not the top.
+const rent = (await callTool("search_tables", { query: "rent", limit: 40 })).structuredContent;
+const cpiHit = rent.results.find((r: any) => r.id === "CPI");
+check(cpiHit !== undefined, `search 'rent' reaches CPI through its INDEX options (${rent.total} results)`);
+check(Array.isArray(cpiHit?.matchedOptions) && cpiHit.matchedOptions.some((m: any) => m.dimension === "INDEX" && /rent/i.test(m.label ?? "")), `matchedOptions names the option (${JSON.stringify(cpiHit?.matchedOptions?.slice(0, 2))})`);
+const familyHit = rent.results.find((r: any) => r.family);
+check(!familyHit || Array.isArray(familyHit.familyGeographies), "census families collapse with familyGeographies");
+const familyIds = rent.results.filter((r: any) => r.family).map((r: any) => r.family);
+check(new Set(familyIds).size === familyIds.length, "no family appears twice in one result page");
+
 // ------------------------------------------------------------ describe
 process.stdout.write("describe_table\n");
 const describe = (await callTool("describe_table", { table: "CPI" })).structuredContent;
