@@ -263,10 +263,64 @@ export function generateContract(sqlite: Database, opts: GenerateOptions): Gener
     `export type BrandedCode<CL extends keyof typeof BRANDED_CODELISTS> = string & { readonly __codelist: CL };\n`;
   writeFileSync(join(genDir, "options.ts"), optionsTs, "utf8");
 
+  // ------------------------------------------------------------- findings
+  // A Markdown rendering of the latest delta report, so the Worker can serve
+  // it as an MCP resource without a runtime dependency on the report files.
+  const latestDelta = one<{ run_id: string | null }>(
+    `SELECT run_id FROM delta_finding ORDER BY detected_at DESC LIMIT 1`,
+  );
+  const findingRows = latestDelta?.run_id
+    ? all<{ kind: string; severity: string; summary: string }>(
+        `SELECT kind, severity, summary FROM delta_finding WHERE run_id = ?
+         ORDER BY CASE severity WHEN 'critical' THEN 0 WHEN 'major' THEN 1 WHEN 'minor' THEN 2 ELSE 3 END, kind`,
+        latestDelta.run_id,
+      )
+    : [];
+  const checks = all<{ label: string; verdict: string; http_status: number | null; detail: string }>(
+    `SELECT label, verdict, http_status, detail FROM endpoint_check
+     WHERE run_id = (SELECT run_id FROM endpoint_check ORDER BY checked_at DESC LIMIT 1)
+     ORDER BY CASE verdict WHEN 'conforms' THEN 1 ELSE 0 END, label`,
+  );
+  const byKind = new Map<string, typeof findingRows>();
+  for (const f of findingRows) byKind.set(f.kind, [...(byKind.get(f.kind) ?? []), f]);
+
+  const md: string[] = [];
+  md.push(`# What the ABS Data API's metadata gets wrong`);
+  md.push(``);
+  md.push(
+    `Measured ${run?.finished_at ?? generatedAt}: ${totals.flows.toLocaleString("en-AU")} dataflows, ` +
+      `${totals.series.toLocaleString("en-AU")} series confirmed by retrieval against ` +
+      `${totals.declared.toLocaleString("en-AU")} implied by content constraints — density ` +
+      `${totals.declared > 0 ? ((totals.series / totals.declared) * 100).toFixed(2) : "n/a"}%.`,
+  );
+  md.push(``);
+  md.push(`## Endpoint conformance (${checks.filter((c) => c.verdict !== "conforms").length} of ${checks.length} non-conforming)`);
+  md.push(``);
+  for (const c of checks) md.push(`- ${c.verdict === "conforms" ? "ok" : `**${c.verdict}**`} — ${c.label}${c.http_status ? ` (HTTP ${c.http_status})` : ""}: ${c.detail}`);
+  md.push(``);
+  for (const [kind, rows] of byKind) {
+    md.push(`## ${kind} (${rows.length.toLocaleString("en-AU")})`);
+    md.push(``);
+    for (const r of rows.slice(0, 12)) md.push(`- [${r.severity}] ${r.summary}`);
+    if (rows.length > 12) md.push(`- … ${(rows.length - 12).toLocaleString("en-AU")} more in the full report`);
+    md.push(``);
+  }
+  writeFileSync(
+    join(genDir, "findings.ts"),
+    header(runId, generatedAt) +
+      `export const FINDINGS_MD = ${JSON.stringify(md.join("\n"))};\n` +
+      `export const FINDINGS_SUMMARY = ${JSON.stringify(
+        { total: findingRows.length, byKind: Object.fromEntries([...byKind].map(([k, v]) => [k, v.length])), nonConformingEndpoints: checks.filter((c) => c.verdict !== "conforms").length, endpointsChecked: checks.length },
+        null,
+        1,
+      )} as const;\n`,
+    "utf8",
+  );
+
   writeFileSync(
     join(genDir, "index.ts"),
     header(runId, generatedAt) +
-      `export * from "./manifest.ts";\nexport * from "./tables.ts";\nexport * from "./options.ts";\n`,
+      `export * from "./manifest.ts";\nexport * from "./tables.ts";\nexport * from "./options.ts";\nexport * from "./findings.ts";\n`,
     "utf8",
   );
   log(`contract: ${tableEntries.length} tables, ${dimRows.length} dimensions, ${smallCodelists.length} literal codelists (${literalCodes} codes), ${branded.length} branded`);

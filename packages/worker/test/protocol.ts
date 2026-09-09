@@ -48,7 +48,13 @@ async function rpc(method: string, params: Record<string, unknown> = {}): Promis
       "content-type": "application/json",
       accept: "application/json, text/event-stream",
       "Mcp-Method": method,
-      ...(typeof params["name"] === "string" ? { "Mcp-Name": params["name"] as string } : {}),
+      // Header-based routing (2026-07-28): the named entity travels in Mcp-Name —
+      // a tool or prompt name, or a resource URI — and must agree with the body.
+      ...(typeof params["name"] === "string"
+        ? { "Mcp-Name": params["name"] as string }
+        : typeof params["uri"] === "string"
+          ? { "Mcp-Name": params["uri"] as string }
+          : {}),
     },
     body: JSON.stringify(body),
   });
@@ -161,6 +167,26 @@ const retried = (await callTool(
   { inputResponses: { REGION: { action: "accept", content: { value: "50" } } } },
 )).structuredContent;
 check(retried?.key?.endsWith(".50.") || retried?.key?.includes(".50."), `retry with inputResponses resolves (${retried?.key})`);
+
+// -------------------------------------------------------- resources/prompts
+process.stdout.write("resources\n");
+const resources = await rpc("resources/list");
+const resourceUris = (resources.resources as Array<{ uri: string }>).map((r) => r.uri).sort();
+check(["abs://catalogue", "abs://findings", "abs://guide", "abs://openapi"].every((u) => resourceUris.includes(u)), `lists the four documents (${resourceUris.join(", ")})`);
+check(resources.cacheScope === "public" && resources.ttlMs > 0, "resources/list is cacheable");
+const guide = await rpc("resources/read", { uri: "abs://guide" });
+check(/search_tables/.test(guide.contents?.[0]?.text ?? ""), "abs://guide reads as the usage guide");
+const findingsDoc = await rpc("resources/read", { uri: "abs://findings" });
+check(/density/i.test(findingsDoc.contents?.[0]?.text ?? ""), "abs://findings reads the measured gap");
+const tableDoc = await rpc("resources/read", { uri: "abs://table/CPI" });
+check(/MEASURE\.INDEX\.TSEST\.REGION\.FREQ/.test(tableDoc.contents?.[0]?.text ?? ""), "abs://table/CPI reads the description");
+
+process.stdout.write("prompts\n");
+const prompts = await rpc("prompts/list");
+const promptNames = (prompts.prompts as Array<{ name: string }>).map((p) => p.name).sort();
+check(JSON.stringify(promptNames) === JSON.stringify(["compare_capitals", "explain_metadata_gap", "suburb_dossier"]), `three packaged workflows (${promptNames.join(", ")})`);
+const dossier = await rpc("prompts/get", { name: "suburb_dossier", arguments: { place: "Fitzroy" } });
+check(/Fitzroy/.test(dossier.messages?.[0]?.content?.text ?? "") && /search_options/.test(dossier.messages?.[0]?.content?.text ?? ""), "suburb_dossier renders with the place and the tool plan");
 
 // ------------------------------------------------------------ HTTP door
 process.stdout.write("HTTP door\n");

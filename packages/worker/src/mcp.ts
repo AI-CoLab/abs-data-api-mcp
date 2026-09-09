@@ -32,6 +32,8 @@ import {
 import { Catalogue } from "./catalogue.ts";
 import { resolveSelection } from "./resolve.ts";
 import { fetchData } from "./abs-data.ts";
+import { registerResources } from "./resources.ts";
+import { registerPrompts } from "./prompts.ts";
 
 const NAME = "abs-data";
 const VERSION = MANIFEST.runId;
@@ -180,11 +182,17 @@ export function buildMcpServer(d1: D1Database): McpServer {
     },
   );
 
+  registerResources(server, catalogue);
+  registerPrompts(server);
   return server;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const PUBLIC_DAY = { ttlMs: DAY_MS, cacheScope: "public" as const };
 const MCP_CACHE_HINTS = {
-  "tools/list": { ttlMs: DAY_MS, cacheScope: "public" as const },
-  "server/discover": { ttlMs: DAY_MS, cacheScope: "public" as const },
+  "tools/list": PUBLIC_DAY,
+  "prompts/list": PUBLIC_DAY,
+  "resources/list": PUBLIC_DAY,
+  "resources/templates/list": PUBLIC_DAY,
+  "server/discover": PUBLIC_DAY,
 };
