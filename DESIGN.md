@@ -557,13 +557,29 @@ Two independent groups, never joined into the canonical view.
 **Derived:**
 `delta_finding` (regenerated each crawl, never hand-edited)
 
-## 6. Next steps
+## 6. Status and next steps
 
-1. `git init`, scaffold the TypeScript project (crawler + Worker, shared schema).
-2. Implement the schema with Zod/Drizzle and the structural crawler.
-3. Full structural crawl (~7 min) — complete knowledge of the dimension space.
-4. Implement the observed probe with dimension-splitting and streaming CSV parse.
-5. Full observed probe, R2 archive, SQLite build.
-6. Delta report generation.
-7. Search-first artifact over the catalogue.
-8. Design and build the MCP front door.
+Done (2026-09-08 → 09):
+
+1. ✔ Workspace, Drizzle schema, structural crawler — structural crawl in 68s.
+2. ✔ Observed probe with OR-group splitting, stall watchdog, sharded dedupe —
+   all 1,227 flows, 621,536,714 series, 399GB local catalogue.
+3. ✔ Delta report (513 findings), sparsity analysis (96.4% explained),
+   corrected OpenAPI document, drafted ABS report (`reports/`).
+4. ✔ Search-first artifact published.
+5. ✔ Contract generator → `@abs/contract` + D1 import (3.9M rows, 185MB SQL).
+6. ✔ Front door built: MCP door (SDK v2, MRTR) + HTTP door (oRPC, Scalar).
+   30/30 protocol checks against the local server.
+7. ✔ Deployed to Cloudflare: D1 (region OC) + R2 created, Worker live at
+   `abs-data-front-door.aicolab.workers.dev`; catalogue import in progress.
+
+Next, in order:
+
+8. Live protocol suite against the deployed Worker; real-client verification
+   from a Claude Code session via `.mcp.json` (decision 31).
+9. Weekly Worker cron: structural/constraint diff + `updatedAfter` checks
+   (decision 28). Monthly full re-probe stays self-hosted.
+10. Worker-backed live artifact (decision 30).
+11. Level-2 sparsity verification, bounded (2.11 caveat).
+12. Cap'n Web SDK and Code Mode door from the same contract (decision 21).
+13. Rate limiting, last (decision 22).
