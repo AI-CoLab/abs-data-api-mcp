@@ -8,11 +8,13 @@ that only ever offer what exists.
 | | |
 |---|---|
 | Front door | <https://abs-data-front-door.aicolab.workers.dev> |
-| MCP (2026-07-28, stateless) | `https://abs-data-front-door.aicolab.workers.dev/mcp` |
+| MCP (2026-07-28, stateless) — 4 fixed verbs + Code Mode `search`/`execute`, resources, prompts | `https://abs-data-front-door.aicolab.workers.dev/mcp` |
 | HTTP API | `https://abs-data-front-door.aicolab.workers.dev/api/tables` |
 | Scalar reference | <https://abs-data-front-door.aicolab.workers.dev/api/docs> |
 | Corrected OpenAPI | <https://abs-data-front-door.aicolab.workers.dev/api/openapi.json> |
-| Browsable catalogue | <https://claude.ai/code/artifact/d0635dee-5cce-40dd-bfa2-7ab7dd03e5bd> |
+| The menu as one document | <https://abs-data-front-door.aicolab.workers.dev/api/catalogue.json> |
+| Live browsable catalogue | <https://abs-data-front-door.aicolab.workers.dev/catalogue> |
+| Static snapshot (claude.ai artifact) | <https://claude.ai/code/artifact/d0635dee-5cce-40dd-bfa2-7ab7dd03e5bd> |
 
 ## What was found
 

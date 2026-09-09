@@ -582,13 +582,32 @@ Done (2026-09-08 → 09):
 7. ✔ Deployed to Cloudflare: D1 (region OC) + R2 created, Worker live at
    `abs-data-front-door.aicolab.workers.dev`; catalogue import in progress.
 
-Next, in order:
+8. ✔ Live protocol suite passes against the deployed Worker. Real-client
+   verification done from claude.ai (2026-09-09): tools loaded, live numbers,
+   suburb-level queries, self-correcting failure mode noticed unprompted, and a
+   working explorer built on top with no documentation.
+9. ✔ Discovery improvements from that session: option-label search with
+   `matchedOptions`, descriptions, census family collapse, ambiguity reporting,
+   all-relaxations diagnosis, rows sorted by series then period.
+10. ✔ MCP resources (`abs://guide`, `abs://findings`, `abs://catalogue`,
+    `abs://openapi`, `abs://table/{id}`) and prompts (`suburb_dossier`,
+    `compare_capitals`, `explain_metadata_gap`).
+11. ✔ Live catalogue served from the Worker at `/catalogue` (the artifact HTML
+    detects the Worker origin and lights up live coverage, option search and a
+    latest-values preview; on claude.ai the CSP keeps it a static snapshot).
+12. ✔ **Code Mode door, live in production.** `search` runs model-written JS
+    over the catalogue document in a no-network isolate; `execute` runs it in an
+    isolate whose only capability is `abs`, the validated client injected via
+    `ctx.exports.AbsToolsEntrypoint`. `globalOutbound: null`; budgets 10s CPU,
+    50 subrequests, 25s wall, 20KB code, 200KB result. Worker Loaders are
+    enabled on the account. Verified live: catalogue query, fetch-and-compute,
+    catchable validation errors, blocked network.
 
-8. Live protocol suite against the deployed Worker; real-client verification
-   from a Claude Code session via `.mcp.json` (decision 31).
-9. Weekly Worker cron: structural/constraint diff + `updatedAfter` checks
-   (decision 28). Monthly full re-probe stays self-hosted.
-10. Worker-backed live artifact (decision 30).
-11. Level-2 sparsity verification, bounded (2.11 caveat).
-12. Cap'n Web SDK and Code Mode door from the same contract (decision 21).
-13. Rate limiting, last (decision 22).
+Remaining, in order:
+
+13. Weekly Worker cron: structural/constraint diff + `updatedAfter` checks
+    (decision 28). Monthly full re-probe stays self-hosted.
+14. Level-2 sparsity verification, bounded (2.11 caveat).
+15. Cap'n Web `RpcTarget` SDK from the same contract (decision 21).
+16. Rate limiting, last (decision 22) — with `execute` as the primary reason.
+17. Exposure decisions when ready: repo public, ABS report, registry listing.
