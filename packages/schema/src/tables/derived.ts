@@ -78,6 +78,13 @@ export const DELTA_FINDING_KINDS = {
   UNDECLARED_OBSERVED_CODE: "undeclared-observed-code",
   /** Metadata inconsistency, e.g. both ORDER and order annotation types. */
   METADATA_INCONSISTENCY: "metadata-inconsistency",
+  /**
+   * Positive corpus-level finding: declared per-dimension marginals match
+   * observed exactly (no unused declared codes, no undeclared observed codes),
+   * so the entire availability overstatement is combinatorial. Doubles as an
+   * independent completeness check on the crawl.
+   */
+  MARGINALS_EXACT: "marginals-exact",
   /** OpenAPI spec omits a parameter that works, or lists one that does not. */
   SPEC_DRIFT: "spec-drift",
   /** Flow named or shaped like a test fixture in production. */

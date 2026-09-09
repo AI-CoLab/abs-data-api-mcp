@@ -38,6 +38,7 @@ const KIND_TITLES: Record<string, string> = {
   "undeclared-observed-code": "Real codes missing from the content constraint",
   "metadata-inconsistency": "Metadata inconsistencies",
   "test-artefact": "Test fixtures in production",
+  "marginals-exact": "Per-dimension metadata is exact — the overstatement is purely combinatorial",
 };
 
 export function buildJsonReport(sqlite: Database, inputs: ReportInputs): unknown {

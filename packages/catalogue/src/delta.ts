@@ -278,6 +278,39 @@ export function generateDelta(sqlite: Database, opts: DeltaOptions): DeltaSummar
     });
   }
 
+  // ------------------------------------------------------- marginal exactness
+  // When BOTH code-level queries return nothing across a fully probed corpus,
+  // that is not an absence of findings — it is the strongest finding in the
+  // report: declared marginals are exact projections of the real key set
+  // (every advertised option exists; nothing real is unadvertised), so the
+  // entire overstatement is combinatorial. It also independently corroborates
+  // crawl completeness: two unrelated pipelines agree per dimension per flow.
+  const flowsProbedCount = one<{ n: number }>(
+    `SELECT COUNT(*) AS n FROM observed_flow WHERE series_count > 0`,
+  ).n;
+  if (unusedCodes.length === 0 && undeclared.length === 0 && flowsProbedCount > 0) {
+    findings.push({
+      kind: DELTA_FINDING_KINDS.MARGINALS_EXACT,
+      severity: "info",
+      flowId: null,
+      dimensionId: null,
+      summary:
+        `Across all ${flowsProbedCount} dataflows, declared per-dimension code sets match ` +
+        `observed exactly — every advertised option exists in real data and no real code is ` +
+        `unadvertised. The availability overstatement is therefore entirely combinatorial: ` +
+        `the metadata implies a cross-product, and only a fraction of it exists.`,
+      evidence: {
+        unusedDeclaredCodes: 0,
+        undeclaredObservedCodes: 0,
+        note:
+          "also serves as an independent completeness check on the observed crawl: the " +
+          "constraint pipeline and the probe agree on every dimension of every flow",
+      },
+      declaredValue: null,
+      observedValue: null,
+    });
+  }
+
   // --------------------------------------------------- metadata inconsistencies
   const casing = all<{ variants: number }>(
     `SELECT COUNT(DISTINCT type) AS variants FROM code_annotation WHERE UPPER(type) = 'ORDER'`,

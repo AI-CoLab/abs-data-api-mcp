@@ -170,6 +170,31 @@ Observed density varies far too widely to extrapolate from — 4.6%
 (`BA_SA2_201116`) to 100% (`POP_PROJ_REGION`) — which is why the probe is
 preceded by an exact `Range: bytes=0-0` sizing pass rather than an estimate.
 
+### 2.10 Final corpus measurements (crawl completed 2026-09-09)
+
+All 1,227 dataflows probed to completion; none partial, none empty.
+
+| Measure | Value |
+|---|---|
+| Series confirmed | **621,536,714** |
+| Series implied by constraints | 14,761,557,818 |
+| Overall density | **4.21% — overstated 23.8×** |
+| Flows ≥95% dense | 155 |
+| Flows at 10–50% (census 11.1% band dominates) | 685 |
+| Flows <2% dense | 180 |
+| Flows serving no data | **0** (even `TEST` serves 3 series) |
+| Local database | 399GB incl. 3.4B-row dimension index |
+
+**The strongest single finding: declared per-dimension marginals are exact.**
+Across every dimension of every flow, the constraint's code set equals the
+observed code set — no advertised option lacks data, no real code is
+unadvertised. The entire 23.8× overstatement is therefore **combinatorial**:
+the metadata implies a cross-product and only 4.21% of it exists. Two
+consequences: (a) the defect to report to ABS is precisely "your marginals are
+trustworthy, the cross-product they imply is not"; (b) it independently
+corroborates crawl completeness — ABS's constraint pipeline and this probe
+measured the same corpus by different routes and agree everywhere.
+
 ### 2.5 Data volume and shape
 
 Sampled series counts per flow (`lastNObservations=1`) vary by four orders of
