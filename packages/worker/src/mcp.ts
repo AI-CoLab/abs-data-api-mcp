@@ -144,7 +144,11 @@ export function buildMcpServer(d1: D1Database): McpServer {
       const envelope = ctx.mcpReq.envelope as Record<string, unknown> | undefined;
       const caps = envelope?.[CLIENT_CAPABILITIES_META_KEY] as Caps;
       const canElicit = caps?.elicitation?.form !== undefined;
-      if (canElicit && err.dimension && (err.reason === "unknown_option" || err.reason === "no_data_for_combination")) {
+      const correctable =
+        err.reason === "unknown_option" ||
+        err.reason === "ambiguous_option" ||
+        err.reason === "no_data_for_combination";
+      if (canElicit && err.dimension && correctable) {
         const codes = (err.validOptions ?? []).map((o) => o.code);
         const labels = (err.validOptions ?? []).map((o) => (o.label ? `${o.code} = ${o.label}` : o.code));
         return inputRequired({

@@ -1,7 +1,7 @@
 {
   "report": "ABS Data API — declared vs observed delta",
-  "generatedAt": "2026-09-09T05:00:01.790Z",
-  "runId": "delta-2026-09-09T05-00-01-789Z",
+  "generatedAt": "2026-09-09T05:27:17.286Z",
+  "runId": "delta-2026-09-09T05-27-17-286Z",
   "method": "Declared metadata was read from the ABS structure endpoints. Observed availability was established by pulling data (detail=serieskeysonly is broken). Only empirically-confirmed series are treated as real; this report is the derived difference between the two.",
   "totals": {
     "flows": 1227,
@@ -23,12 +23,12 @@
       "uncategorised-flow": 2,
       "test-artefact": 1,
       "marginals-exact": 1,
-      "metadata-inconsistency": 1
+      "metadata-inconsistency": 171
     },
     "bySeverity": {
       "major": 316,
       "critical": 1,
-      "minor": 195,
+      "minor": 365,
       "info": 1
     }
   },
@@ -7800,6 +7800,2909 @@
       "observedValue": null,
       "evidence": {
         "note": "normalised to upper case on ingest; consumers matching case-sensitively will miss some"
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ANA_SECTOR: label \"Public non-financial corporations\" is shared by 3 codes (GTS, PKS, GKS) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ANA_SECTOR",
+        "label": "Public non-financial corporations",
+        "codes": [
+          "GTS",
+          "PKS",
+          "GKS"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_MTWP: label \"Other\" is shared by 3 codes (11, 21, BO) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_MTWP",
+        "label": "Other",
+        "codes": [
+          "11",
+          "21",
+          "BO"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Accommodation\" is shared by 3 codes (44, 440, 4400) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Accommodation",
+        "codes": [
+          "44",
+          "440",
+          "4400"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Air and Space Transport\" is shared by 3 codes (49, 490, 4900) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Air and Space Transport",
+        "codes": [
+          "49",
+          "490",
+          "4900"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Coal Mining\" is shared by 3 codes (06, 060, 0600) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Coal Mining",
+        "codes": [
+          "06",
+          "060",
+          "0600"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Commission-Based Wholesaling\" is shared by 3 codes (38, 380, 3800) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Commission-Based Wholesaling",
+        "codes": [
+          "38",
+          "380",
+          "3800"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Computer System Design and Related Services\" is shared by 3 codes (70, 700, 7000) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Computer System Design and Related Services",
+        "codes": [
+          "70",
+          "700",
+          "7000"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Defence\" is shared by 3 codes (76, 760, 7600) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Defence",
+        "codes": [
+          "76",
+          "760",
+          "7600"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Fuel Retailing\" is shared by 3 codes (40, 400, 4000) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Fuel Retailing",
+        "codes": [
+          "40",
+          "400",
+          "4000"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Gas Supply\" is shared by 3 codes (27, 270, 2700) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Gas Supply",
+        "codes": [
+          "27",
+          "270",
+          "2700"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Internet Publishing and Broadcasting\" is shared by 3 codes (57, 570, 5700) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Internet Publishing and Broadcasting",
+        "codes": [
+          "57",
+          "570",
+          "5700"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Oil and Gas Extraction\" is shared by 3 codes (07, 070, 0700) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Oil and Gas Extraction",
+        "codes": [
+          "07",
+          "070",
+          "0700"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_SSC_2011: label \"Robinvale Irrigation District Secti\" is shared by 3 codes (21153, 21154, 21155) — label-based selection is ambiguous",
+      "declaredValue": 3,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_SSC_2011",
+        "label": "Robinvale Irrigation District Secti",
+        "codes": [
+          "21153",
+          "21154",
+          "21155"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"0 - 14\" is shared by 2 codes (T0, 0014) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "0 - 14",
+        "codes": [
+          "T0",
+          "0014"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"15 - 19\" is shared by 2 codes (A15, 1519) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "15 - 19",
+        "codes": [
+          "A15",
+          "1519"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"15 - 24\" is shared by 2 codes (T15, 1524) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "15 - 24",
+        "codes": [
+          "T15",
+          "1524"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"25 - 34\" is shared by 2 codes (T25, 2534) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "25 - 34",
+        "codes": [
+          "T25",
+          "2534"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"35 - 44\" is shared by 2 codes (T35, 3544) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "35 - 44",
+        "codes": [
+          "T35",
+          "3544"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"45 - 54\" is shared by 2 codes (T45, 4554) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "45 - 54",
+        "codes": [
+          "T45",
+          "4554"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"5 - 14\" is shared by 2 codes (T5, 0514) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "5 - 14",
+        "codes": [
+          "T5",
+          "0514"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"55 - 64\" is shared by 2 codes (T55, 5564) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "55 - 64",
+        "codes": [
+          "T55",
+          "5564"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"65 - 74\" is shared by 2 codes (T65, 6574) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "65 - 74",
+        "codes": [
+          "T65",
+          "6574"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_AGE: label \"75 and over\" is shared by 2 codes (7599, 75OVER) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_AGE",
+        "label": "75 and over",
+        "codes": [
+          "7599",
+          "75OVER"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ANA_SECTOR: label \"Non-financial corporations\" is shared by 2 codes (NFS, SKS) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ANA_SECTOR",
+        "label": "Non-financial corporations",
+        "codes": [
+          "NFS",
+          "SKS"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ANA_SECTOR: label \"Non-residents\" is shared by 2 codes (SOS, SOC) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ANA_SECTOR",
+        "label": "Non-residents",
+        "codes": [
+          "SOS",
+          "SOC"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ANA_SECTOR: label \"Other sectors\" is shared by 2 codes (OSS, SES) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ANA_SECTOR",
+        "label": "Other sectors",
+        "codes": [
+          "OSS",
+          "SES"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ANA_SFD: label \"Final consumption expenditure\" is shared by 2 codes (FCEH, FCE) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ANA_SFD",
+        "label": "Final consumption expenditure",
+        "codes": [
+          "FCEH",
+          "FCE"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ANA_SFD: label \"Final demand\" is shared by 2 codes (GFD, PFD) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ANA_SFD",
+        "label": "Final demand",
+        "codes": [
+          "GFD",
+          "PFD"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Unknown Australia\" is shared by 2 codes (10UNKN, 10) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Unknown Australia",
+        "codes": [
+          "10UNKN",
+          "10"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (NSW)\" is shared by 2 codes (197, 19799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (NSW)",
+        "codes": [
+          "197",
+          "19799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (Vic.)\" is shared by 2 codes (297, 29799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (Vic.)",
+        "codes": [
+          "297",
+          "29799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (Qld)\" is shared by 2 codes (397, 39799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (Qld)",
+        "codes": [
+          "397",
+          "39799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (SA)\" is shared by 2 codes (497, 49799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (SA)",
+        "codes": [
+          "497",
+          "49799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (WA)\" is shared by 2 codes (597, 59799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (WA)",
+        "codes": [
+          "597",
+          "59799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (Tas.)\" is shared by 2 codes (697, 69799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (Tas.)",
+        "codes": [
+          "697",
+          "69799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (NT)\" is shared by 2 codes (797, 79799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (NT)",
+        "codes": [
+          "797",
+          "79799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Australian Capital Territory\" is shared by 2 codes (801, 8ACTE) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Australian Capital Territory",
+        "codes": [
+          "801",
+          "8ACTE"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (ACT)\" is shared by 2 codes (897, 89799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (ACT)",
+        "codes": [
+          "897",
+          "89799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Migratory - Offshore - Shipping (OT)\" is shared by 2 codes (997, 99799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Migratory - Offshore - Shipping (OT)",
+        "codes": [
+          "997",
+          "99799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2011: label \"Other Territories\" is shared by 2 codes (901, 9OTER) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2011",
+        "label": "Other Territories",
+        "codes": [
+          "901",
+          "9OTER"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ASGS_2016: label \"Migratory - Offshore - Shipping (OT)\" is shared by 2 codes (99797, 99799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ASGS_2016",
+        "label": "Migratory - Offshore - Shipping (OT)",
+        "codes": [
+          "99797",
+          "99799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Unknown Australia\" is shared by 2 codes (10UNKN, 10) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Unknown Australia",
+        "codes": [
+          "10UNKN",
+          "10"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (NSW)\" is shared by 2 codes (197, 19799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (NSW)",
+        "codes": [
+          "197",
+          "19799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (Vic.)\" is shared by 2 codes (297, 29799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (Vic.)",
+        "codes": [
+          "297",
+          "29799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (Qld)\" is shared by 2 codes (397, 39799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (Qld)",
+        "codes": [
+          "397",
+          "39799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (SA)\" is shared by 2 codes (497, 49799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (SA)",
+        "codes": [
+          "497",
+          "49799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (WA)\" is shared by 2 codes (597, 59799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (WA)",
+        "codes": [
+          "597",
+          "59799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (Tas.)\" is shared by 2 codes (697, 69799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (Tas.)",
+        "codes": [
+          "697",
+          "69799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (NT)\" is shared by 2 codes (797, 79799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (NT)",
+        "codes": [
+          "797",
+          "79799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Australian Capital Territory\" is shared by 2 codes (801, 8ACTE) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Australian Capital Territory",
+        "codes": [
+          "801",
+          "8ACTE"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (ACT)\" is shared by 2 codes (897, 89799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (ACT)",
+        "codes": [
+          "897",
+          "89799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Migratory - Offshore - Shipping (OT)\" is shared by 2 codes (997, 99799) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Migratory - Offshore - Shipping (OT)",
+        "codes": [
+          "997",
+          "99799"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_ASGS: label \"Other Territories\" is shared by 2 codes (901, 9OTER) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_ASGS",
+        "label": "Other Territories",
+        "codes": [
+          "901",
+          "9OTER"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_LANP_TS: label \"Overseas visitors\" is shared by 2 codes (V, VIS) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_LANP_TS",
+        "label": "Overseas visitors",
+        "codes": [
+          "V",
+          "VIS"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_MTWP: label \"Car, as driver\" is shared by 2 codes (016, 025) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_MTWP",
+        "label": "Car, as driver",
+        "codes": [
+          "016",
+          "025"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_MTWP: label \"Car, as passenger\" is shared by 2 codes (017, 026) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_MTWP",
+        "label": "Car, as passenger",
+        "codes": [
+          "017",
+          "026"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_MTWP: label \"Ferry\" is shared by 2 codes (013, 022) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_MTWP",
+        "label": "Ferry",
+        "codes": [
+          "013",
+          "022"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_MTWP: label \"Other\" is shared by 2 codes (021, BO) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_MTWP",
+        "label": "Other",
+        "codes": [
+          "021",
+          "BO"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_MTWP: label \"Tram (includes light rail)\" is shared by 2 codes (014, 023) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_MTWP",
+        "label": "Tram (includes light rail)",
+        "codes": [
+          "014",
+          "023"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_PUR1P: label \"Different SA2  Total\" is shared by 2 codes (2_0, 2_D) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_PUR1P",
+        "label": "Different SA2  Total",
+        "codes": [
+          "2_0",
+          "2_D"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_SPCT: label \"Total persons\" is shared by 2 codes (TT, AGEG) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_SPCT",
+        "label": "Total persons",
+        "codes": [
+          "TT",
+          "AGEG"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_TISP: label \"Six or more children\" is shared by 2 codes (06OVER, 06_8) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_TISP",
+        "label": "Six or more children",
+        "codes": [
+          "06OVER",
+          "06_8"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C11_YARRP: label \"2001-2005\" is shared by 2 codes (8, 12) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C11_YARRP",
+        "label": "2001-2005",
+        "codes": [
+          "8",
+          "12"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"15 - 19\" is shared by 2 codes (1519, A15) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "15 - 19",
+        "codes": [
+          "1519",
+          "A15"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"15 - 24\" is shared by 2 codes (1524, T15) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "15 - 24",
+        "codes": [
+          "1524",
+          "T15"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"25 - 34\" is shared by 2 codes (2534, T25) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "25 - 34",
+        "codes": [
+          "2534",
+          "T25"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"35 - 44\" is shared by 2 codes (3544, T35) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "35 - 44",
+        "codes": [
+          "3544",
+          "T35"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"45 - 54\" is shared by 2 codes (4554, T45) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "45 - 54",
+        "codes": [
+          "4554",
+          "T45"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"5 - 14\" is shared by 2 codes (0514, T5) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "5 - 14",
+        "codes": [
+          "0514",
+          "T5"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"55 - 64\" is shared by 2 codes (5564, T55) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "55 - 64",
+        "codes": [
+          "5564",
+          "T55"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"65 - 74\" is shared by 2 codes (6574, T65) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "65 - 74",
+        "codes": [
+          "6574",
+          "T65"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_AGE: label \"75 and over\" is shared by 2 codes (7599, 75OVER) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_AGE",
+        "label": "75 and over",
+        "codes": [
+          "7599",
+          "75OVER"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_LANP: label \"Djinba\" is shared by 2 codes (826, 8262) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_LANP",
+        "label": "Djinba",
+        "codes": [
+          "826",
+          "8262"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_LANP: label \"Nhangu\" is shared by 2 codes (828, 8281) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_LANP",
+        "label": "Nhangu",
+        "codes": [
+          "828",
+          "8281"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_C16_REGION_TYPE: label \"Other\" is shared by 2 codes (O, OT) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_C16_REGION_TYPE",
+        "label": "Other",
+        "codes": [
+          "O",
+          "OT"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_ERP_COB: label \"Inadequately Described\" is shared by 2 codes (0000, X_0000) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_ERP_COB",
+        "label": "Inadequately Described",
+        "codes": [
+          "0000",
+          "X_0000"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_MODELLERS_DB: label \"Households ; Secondary income receivable - Social assistance benefits (Current prices)\" is shared by 2 codes (AC_TCB$, UC_BTCB$) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_MODELLERS_DB",
+        "label": "Households ; Secondary income receivable - Social assistance benefits (Current prices)",
+        "codes": [
+          "AC_TCB$",
+          "UC_BTCB$"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Adult, Community and Other Education\" is shared by 2 codes (82, 821) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Adult, Community and Other Education",
+        "codes": [
+          "82",
+          "821"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Advertising Services\" is shared by 2 codes (694, 6940) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Advertising Services",
+        "codes": [
+          "694",
+          "6940"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Airport Operations and Other Air Transport Support Services\" is shared by 2 codes (522, 5220) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Airport Operations and Other Air Transport Support Services",
+        "codes": [
+          "522",
+          "5220"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Aquaculture\" is shared by 2 codes (02, 020) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Aquaculture",
+        "codes": [
+          "02",
+          "020"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Auxiliary Insurance Services\" is shared by 2 codes (642, 6420) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Auxiliary Insurance Services",
+        "codes": [
+          "642",
+          "6420"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Central Banking\" is shared by 2 codes (621, 6210) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Central Banking",
+        "codes": [
+          "621",
+          "6210"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Central Government Administration\" is shared by 2 codes (751, 7510) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Central Government Administration",
+        "codes": [
+          "751",
+          "7510"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Child Care Services\" is shared by 2 codes (871, 8710) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Child Care Services",
+        "codes": [
+          "871",
+          "8710"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Cigarette and Tobacco Product Manufacturing\" is shared by 2 codes (122, 1220) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Cigarette and Tobacco Product Manufacturing",
+        "codes": [
+          "122",
+          "1220"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Clubs (Hospitality)\" is shared by 2 codes (453, 4530) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Clubs (Hospitality)",
+        "codes": [
+          "453",
+          "4530"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Creative and Performing Arts Activities\" is shared by 2 codes (90, 900) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Creative and Performing Arts Activities",
+        "codes": [
+          "90",
+          "900"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Dairy Cattle Farming\" is shared by 2 codes (016, 0160) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Dairy Cattle Farming",
+        "codes": [
+          "016",
+          "0160"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Deer Farming\" is shared by 2 codes (018, 0180) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Deer Farming",
+        "codes": [
+          "018",
+          "0180"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Department Stores\" is shared by 2 codes (426, 4260) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Department Stores",
+        "codes": [
+          "426",
+          "4260"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Educational Support Services\" is shared by 2 codes (822, 8220) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Educational Support Services",
+        "codes": [
+          "822",
+          "8220"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Electricity Distribution\" is shared by 2 codes (263, 2630) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Electricity Distribution",
+        "codes": [
+          "263",
+          "2630"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Electricity Transmission\" is shared by 2 codes (262, 2620) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Electricity Transmission",
+        "codes": [
+          "262",
+          "2620"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Farm Animal and Bloodstock Leasing\" is shared by 2 codes (662, 6620) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Farm Animal and Bloodstock Leasing",
+        "codes": [
+          "662",
+          "6620"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Financial Asset Investing\" is shared by 2 codes (624, 6240) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Financial Asset Investing",
+        "codes": [
+          "624",
+          "6240"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Forestry Support Services\" is shared by 2 codes (051, 0510) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Forestry Support Services",
+        "codes": [
+          "051",
+          "0510"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Forestry and Logging\" is shared by 2 codes (03, 030) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Forestry and Logging",
+        "codes": [
+          "03",
+          "030"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Fruit and Vegetable Processing\" is shared by 2 codes (114, 1140) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Fruit and Vegetable Processing",
+        "codes": [
+          "114",
+          "1140"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Funeral, Crematorium and Cemetery Services\" is shared by 2 codes (952, 9520) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Funeral, Crematorium and Cemetery Services",
+        "codes": [
+          "952",
+          "9520"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Gambling Activities\" is shared by 2 codes (92, 920) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Gambling Activities",
+        "codes": [
+          "92",
+          "920"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Glass and Glass Product Manufacturing\" is shared by 2 codes (201, 2010) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Glass and Glass Product Manufacturing",
+        "codes": [
+          "201",
+          "2010"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Grocery, Liquor and Tobacco Product Wholesaling\" is shared by 2 codes (36, 360) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Grocery, Liquor and Tobacco Product Wholesaling",
+        "codes": [
+          "36",
+          "360"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Heavy and Civil Engineering Construction\" is shared by 2 codes (31, 310) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Heavy and Civil Engineering Construction",
+        "codes": [
+          "31",
+          "310"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Hospitals\" is shared by 2 codes (84, 840) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Hospitals",
+        "codes": [
+          "84",
+          "840"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Hunting and Trapping\" is shared by 2 codes (042, 0420) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Hunting and Trapping",
+        "codes": [
+          "042",
+          "0420"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Internet Service Providers and Web Search Portals\" is shared by 2 codes (591, 5910) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Internet Service Providers and Web Search Portals",
+        "codes": [
+          "591",
+          "5910"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Iron and Steel Forging\" is shared by 2 codes (221, 2210) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Iron and Steel Forging",
+        "codes": [
+          "221",
+          "2210"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Justice\" is shared by 2 codes (754, 7540) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Justice",
+        "codes": [
+          "754",
+          "7540"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Knitted Product Manufacturing\" is shared by 2 codes (134, 1340) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Knitted Product Manufacturing",
+        "codes": [
+          "134",
+          "1340"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Leather Tanning, Fur Dressing and Leather Product Manufacturing\" is shared by 2 codes (132, 1320) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Leather Tanning, Fur Dressing and Leather Product Manufacturing",
+        "codes": [
+          "132",
+          "1320"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Libraries and Archives\" is shared by 2 codes (601, 6010) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Libraries and Archives",
+        "codes": [
+          "601",
+          "6010"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Life Insurance\" is shared by 2 codes (631, 6310) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Life Insurance",
+        "codes": [
+          "631",
+          "6310"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Local Government Administration\" is shared by 2 codes (753, 7530) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Local Government Administration",
+        "codes": [
+          "753",
+          "7530"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Market Research and Statistical Services\" is shared by 2 codes (695, 6950) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Market Research and Statistical Services",
+        "codes": [
+          "695",
+          "6950"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Metal Ore Mining\" is shared by 2 codes (08, 080) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Metal Ore Mining",
+        "codes": [
+          "08",
+          "080"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Motor Vehicle and Motor Vehicle Parts Wholesaling\" is shared by 2 codes (35, 350) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Motor Vehicle and Motor Vehicle Parts Wholesaling",
+        "codes": [
+          "35",
+          "350"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Museum Operation\" is shared by 2 codes (891, 8910) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Museum Operation",
+        "codes": [
+          "891",
+          "8910"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Natural Rubber Product Manufacturing\" is shared by 2 codes (192, 1920) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Natural Rubber Product Manufacturing",
+        "codes": [
+          "192",
+          "1920"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Non-Depository Financing\" is shared by 2 codes (623, 6230) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Non-Depository Financing",
+        "codes": [
+          "623",
+          "6230"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Non-Financial Intangible Assets (Except Copyrights) Leasing\" is shared by 2 codes (664, 6640) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Non-Financial Intangible Assets (Except Copyrights) Leasing",
+        "codes": [
+          "664",
+          "6640"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Non-Residential Building Construction\" is shared by 2 codes (302, 3020) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Non-Residential Building Construction",
+        "codes": [
+          "302",
+          "3020"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Non-Store Retailing\" is shared by 2 codes (431, 4310) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Non-Store Retailing",
+        "codes": [
+          "431",
+          "4310"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Oil and Fat Manufacturing\" is shared by 2 codes (115, 1150) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Oil and Fat Manufacturing",
+        "codes": [
+          "115",
+          "1150"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"On Selling Electricity and Electricity Market Operation\" is shared by 2 codes (264, 2640) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "On Selling Electricity and Electricity Market Operation",
+        "codes": [
+          "264",
+          "2640"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Other Information Services\" is shared by 2 codes (602, 6020) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Other Information Services",
+        "codes": [
+          "602",
+          "6020"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Other Mining Support Services\" is shared by 2 codes (109, 1090) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Other Mining Support Services",
+        "codes": [
+          "109",
+          "1090"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Other Non-Metallic Mineral Mining and Quarrying\" is shared by 2 codes (099, 0990) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Other Non-Metallic Mineral Mining and Quarrying",
+        "codes": [
+          "099",
+          "0990"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Other Non-Metallic Mineral Product Manufacturing\" is shared by 2 codes (209, 2090) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Other Non-Metallic Mineral Product Manufacturing",
+        "codes": [
+          "209",
+          "2090"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Other Social Assistance Services\" is shared by 2 codes (879, 8790) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Other Social Assistance Services",
+        "codes": [
+          "879",
+          "8790"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Packaging Services\" is shared by 2 codes (732, 7320) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Packaging Services",
+        "codes": [
+          "732",
+          "7320"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Pathology and Diagnostic Imaging Services\" is shared by 2 codes (852, 8520) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Pathology and Diagnostic Imaging Services",
+        "codes": [
+          "852",
+          "8520"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Petroleum and Coal Product Manufacturing\" is shared by 2 codes (17, 170) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Petroleum and Coal Product Manufacturing",
+        "codes": [
+          "17",
+          "170"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Pharmaceutical and Toiletry Goods Wholesaling\" is shared by 2 codes (372, 3720) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Pharmaceutical and Toiletry Goods Wholesaling",
+        "codes": [
+          "372",
+          "3720"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Postal and Courier Pick-up and Delivery Services\" is shared by 2 codes (51, 510) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Postal and Courier Pick-up and Delivery Services",
+        "codes": [
+          "51",
+          "510"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Preschool Education\" is shared by 2 codes (801, 8010) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Preschool Education",
+        "codes": [
+          "801",
+          "8010"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Private Households Employing Staff and Undifferentiated Goods- and Service-Producing Activities of Households for Own Use\" is shared by 2 codes (96, 960) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Private Households Employing Staff and Undifferentiated Goods- and Service-Producing Activities of Households for Own Use",
+        "codes": [
+          "96",
+          "960"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Pubs, Taverns and Bars\" is shared by 2 codes (452, 4520) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Pubs, Taverns and Bars",
+        "codes": [
+          "452",
+          "4520"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Pulp, Paper and Paperboard Manufacturing\" is shared by 2 codes (151, 1510) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Pulp, Paper and Paperboard Manufacturing",
+        "codes": [
+          "151",
+          "1510"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Radio Broadcasting\" is shared by 2 codes (561, 5610) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Radio Broadcasting",
+        "codes": [
+          "561",
+          "5610"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Rail Freight Transport\" is shared by 2 codes (471, 4710) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Rail Freight Transport",
+        "codes": [
+          "471",
+          "4710"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Rail Passenger Transport\" is shared by 2 codes (472, 4720) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Rail Passenger Transport",
+        "codes": [
+          "472",
+          "4720"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Real Estate Services\" is shared by 2 codes (672, 6720) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Real Estate Services",
+        "codes": [
+          "672",
+          "6720"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Regulatory Services\" is shared by 2 codes (772, 7720) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Regulatory Services",
+        "codes": [
+          "772",
+          "7720"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Religious Services\" is shared by 2 codes (954, 9540) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Religious Services",
+        "codes": [
+          "954",
+          "9540"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Reproduction of Recorded Media\" is shared by 2 codes (162, 1620) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Reproduction of Recorded Media",
+        "codes": [
+          "162",
+          "1620"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Residential Care Services\" is shared by 2 codes (86, 860) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Residential Care Services",
+        "codes": [
+          "86",
+          "860"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Retail Commission-Based Buying and/or Selling\" is shared by 2 codes (432, 4320) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Retail Commission-Based Buying and/or Selling",
+        "codes": [
+          "432",
+          "4320"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Road Freight Transport\" is shared by 2 codes (461, 4610) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Road Freight Transport",
+        "codes": [
+          "461",
+          "4610"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Scenic and Sightseeing Transport\" is shared by 2 codes (501, 5010) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Scenic and Sightseeing Transport",
+        "codes": [
+          "501",
+          "5010"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Scientific Research Services\" is shared by 2 codes (691, 6910) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Scientific Research Services",
+        "codes": [
+          "691",
+          "6910"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Seafood Processing\" is shared by 2 codes (112, 1120) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Seafood Processing",
+        "codes": [
+          "112",
+          "1120"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Sheet Metal Product Manufacturing (except Metal Structural and Container Products)\" is shared by 2 codes (224, 2240) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Sheet Metal Product Manufacturing (except Metal Structural and Container Products)",
+        "codes": [
+          "224",
+          "2240"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Software Publishing\" is shared by 2 codes (542, 5420) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Software Publishing",
+        "codes": [
+          "542",
+          "5420"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"State Government Administration\" is shared by 2 codes (752, 7520) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "State Government Administration",
+        "codes": [
+          "752",
+          "7520"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Superannuation Funds\" is shared by 2 codes (633, 6330) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Superannuation Funds",
+        "codes": [
+          "633",
+          "6330"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Supermarket and Grocery Stores\" is shared by 2 codes (411, 4110) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Supermarket and Grocery Stores",
+        "codes": [
+          "411",
+          "4110"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Telecommunications Services\" is shared by 2 codes (58, 580) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Telecommunications Services",
+        "codes": [
+          "58",
+          "580"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Tertiary Education\" is shared by 2 codes (81, 810) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Tertiary Education",
+        "codes": [
+          "81",
+          "810"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Travel Agency and Tour Arrangement Services\" is shared by 2 codes (722, 7220) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Travel Agency and Tour Arrangement Services",
+        "codes": [
+          "722",
+          "7220"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Veterinary Services\" is shared by 2 codes (697, 6970) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Veterinary Services",
+        "codes": [
+          "697",
+          "6970"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Warehousing and Storage Services\" is shared by 2 codes (53, 530) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Warehousing and Storage Services",
+        "codes": [
+          "53",
+          "530"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Water Freight Transport\" is shared by 2 codes (481, 4810) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Water Freight Transport",
+        "codes": [
+          "481",
+          "4810"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Water Passenger Transport\" is shared by 2 codes (482, 4820) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Water Passenger Transport",
+        "codes": [
+          "482",
+          "4820"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_PPI_FD_ITEM: label \"Water Supply, Sewerage and Drainage Services\" is shared by 2 codes (28, 281) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_PPI_FD_ITEM",
+        "label": "Water Supply, Sewerage and Drainage Services",
+        "codes": [
+          "28",
+          "281"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_REGIONAL_LGA2017_MEASURE: label \"Estimated Resident Population - Persons\" is shared by 2 codes (ERP_5, ERP_P_1) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_REGIONAL_LGA2017_MEASURE",
+        "label": "Estimated Resident Population - Persons",
+        "codes": [
+          "ERP_5",
+          "ERP_P_1"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_SERVICES_COUNTRY: label \"Czechoslovakia, nfd\" is shared by 2 codes (CZEC, CZEX) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_SERVICES_COUNTRY",
+        "label": "Czechoslovakia, nfd",
+        "codes": [
+          "CZEC",
+          "CZEX"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_SERVICES_COUNTRY: label \"Former USSR, nfd\" is shared by 2 codes (USSR, USSX) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_SERVICES_COUNTRY",
+        "label": "Former USSR, nfd",
+        "codes": [
+          "USSR",
+          "USSX"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_SERVICES_COUNTRY: label \"Netherlands Antilles, nfd\" is shared by 2 codes (ANTI, NANX) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_SERVICES_COUNTRY",
+        "label": "Netherlands Antilles, nfd",
+        "codes": [
+          "ANTI",
+          "NANX"
+        ]
+      }
+    },
+    {
+      "kind": "metadata-inconsistency",
+      "severity": "minor",
+      "flowId": null,
+      "dimensionId": null,
+      "summary": "CL_SERVICES_COUNTRY: label \"Serbia and Montenegro, nfd\" is shared by 2 codes (YUGO, SMOX) — label-based selection is ambiguous",
+      "declaredValue": 2,
+      "observedValue": null,
+      "evidence": {
+        "codelist": "CL_SERVICES_COUNTRY",
+        "label": "Serbia and Montenegro, nfd",
+        "codes": [
+          "YUGO",
+          "SMOX"
+        ]
       }
     },
     {

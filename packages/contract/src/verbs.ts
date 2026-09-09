@@ -170,10 +170,32 @@ export const invalidSelectionSchema = z.object({
   table: z.string(),
   dimension: z.string().nullable().describe("Offending dimension; null when the whole combination is empty"),
   given: z.union([z.string(), z.array(z.string())]).nullable(),
-  reason: z.enum(["unknown_table", "unknown_dimension", "unknown_option", "no_data_for_combination"]),
+  reason: z.enum([
+    "unknown_table",
+    "unknown_dimension",
+    "unknown_option",
+    /** A label matched several options; pass the code. validOptions lists the candidates. */
+    "ambiguous_option",
+    "no_data_for_combination",
+  ]),
   message: z.string(),
   /** Observed valid options for the offending dimension, given the rest of the selection. Capped. */
   validOptions: z.array(optionSchema).optional(),
   validOptionsTotal: z.number().int().optional(),
+  /**
+   * For an empty combination, every other single dimension whose relaxation
+   * also recovers data, with what would then be valid. Lets a caller choose
+   * which constraint to loosen — e.g. "REGION: only the national aggregate" vs
+   * "FREQ: monthly works".
+   */
+  alternatives: z
+    .array(
+      z.object({
+        dimension: z.string(),
+        validOptions: z.array(optionSchema),
+        validOptionsTotal: z.number().int(),
+      }),
+    )
+    .optional(),
 });
 export type InvalidSelection = z.infer<typeof invalidSelectionSchema>;

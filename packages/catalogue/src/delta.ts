@@ -336,6 +336,35 @@ export function generateDelta(sqlite: Database, opts: DeltaOptions): DeltaSummar
     });
   }
 
+  // Duplicate labels make label-based selection ambiguous: CPI's INDEX has two
+  // codes both named "Rents" (30014, quarterly and monthly; 115522, monthly
+  // only). In hierarchical codelists the same leaf label legitimately recurs
+  // under different parents ("Other" under each language group), so only
+  // duplicates that share a parent — or sit in a flat list — are reported.
+  const duplicateLabels = all<{ codelist_id: string; name: string; n: number; codes: string }>(
+    `SELECT c.codelist_id, c.name, COUNT(*) AS n, GROUP_CONCAT(c.code_id, ', ') AS codes
+     FROM code c
+     WHERE c.name IS NOT NULL
+       AND c.codelist_id IN (SELECT DISTINCT codelist_id FROM declared_dimension WHERE codelist_id IS NOT NULL)
+     GROUP BY c.codelist_id, COALESCE(c.parent_code_id, ''), c.name
+     HAVING n > 1
+     ORDER BY n DESC, c.codelist_id
+     LIMIT ?`,
+    limit,
+  );
+  for (const d of duplicateLabels) {
+    findings.push({
+      kind: DELTA_FINDING_KINDS.METADATA_INCONSISTENCY,
+      severity: "minor",
+      flowId: null,
+      dimensionId: null,
+      summary: `${d.codelist_id}: label "${d.name}" is shared by ${d.n} codes (${d.codes}) — label-based selection is ambiguous`,
+      evidence: { codelist: d.codelist_id, label: d.name, codes: d.codes.split(", ") },
+      declaredValue: d.n,
+      observedValue: null,
+    });
+  }
+
   const flowsWithoutDims = all<{ id: string }>(
     `SELECT d.id FROM declared_flow d
      LEFT JOIN declared_dimension dd ON dd.flow_id = d.id

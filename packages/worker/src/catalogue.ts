@@ -80,18 +80,21 @@ export class Catalogue {
         const topics = t.topics.join(" ").toLowerCase();
         const dims = t.dimensions.map((d) => d.id.toLowerCase()).join(" ");
         for (const term of terms) {
+          // Whole-word matches only: "rent" must not hit "parent" or "current".
+          const word = new RegExp(`(^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`);
           if (id === term) score += 100;
-          else if (id.includes(term)) score += 30;
-          if (name.includes(term)) score += 20;
-          if (topics.includes(term)) score += 8;
-          if (dims.includes(term)) score += 6;
-          if (desc.includes(term)) score += 3;
+          else if (word.test(id)) score += 30;
+          if (word.test(name)) score += 20;
+          if (word.test(topics)) score += 8;
+          if (word.test(dims)) score += 6;
+          if (word.test(desc)) score += 3;
         }
         if (score === 0) continue;
       }
-      // Tie-break toward tables with more data; families are de-emphasised
-      // slightly so nine near-identical census variants do not crowd a page.
-      score += Math.log10(t.seriesCount + 1) - (t.family ? 0.5 : 0);
+      // Relevance decides; data volume only breaks ties (a census giant must not
+      // outrank CPI on size alone). Families are de-emphasised slightly so nine
+      // near-identical census variants do not crowd a page.
+      score += Math.log10(t.seriesCount + 1) * 0.1 - (t.family ? 0.5 : 0);
       scored.push({ t, score });
     }
 
@@ -187,23 +190,35 @@ export class Catalogue {
   /**
    * Resolve one given value (a code, or a label) to an observed code for the
    * dimension. Exact code match wins; then case-insensitive exact label; then a
-   * unique label containing the text.
+   * unique label containing the text. Several matches are reported as
+   * ambiguous rather than guessed — CPI's INDEX has two options both labelled
+   * "Rents" (the quarterly series and the monthly indicator).
    */
-  async resolveOption(table: string, dimension: string, given: string): Promise<Option | undefined> {
+  async resolveOption(
+    table: string,
+    dimension: string,
+    given: string,
+  ): Promise<
+    | { kind: "resolved"; option: Option }
+    | { kind: "ambiguous"; candidates: Option[] }
+    | { kind: "none" }
+  > {
     const o = tables.observedDimensionCode;
     const exact = await this.db
       .select({ code: o.codeId })
       .from(o)
       .where(and(eq(o.flowId, table), eq(o.dimensionId, dimension), eq(o.codeId, given)))
       .limit(1);
-    if (exact[0]) return { code: exact[0].code, label: null };
+    if (exact[0]) return { kind: "resolved", option: { code: exact[0].code, label: null } };
 
     const { options } = await this.options(table, dimension, { query: given, limit: 25 });
     const lower = given.toLowerCase();
     const exactLabel = options.filter((x) => (x.label ?? "").toLowerCase() === lower);
-    if (exactLabel.length === 1) return exactLabel[0];
+    if (exactLabel.length === 1) return { kind: "resolved", option: exactLabel[0]! };
+    if (exactLabel.length > 1) return { kind: "ambiguous", candidates: exactLabel };
     const contains = options.filter((x) => (x.label ?? "").toLowerCase().includes(lower));
-    if (contains.length === 1) return contains[0];
-    return undefined;
+    if (contains.length === 1) return { kind: "resolved", option: contains[0]! };
+    if (contains.length > 1) return { kind: "ambiguous", candidates: contains };
+    return { kind: "none" };
   }
 }

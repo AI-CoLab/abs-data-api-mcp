@@ -67,8 +67,24 @@ export async function resolveSelection(
     const values = Array.isArray(raw) ? raw : [raw];
     const resolved: string[] = [];
     for (const v of values) {
-      const opt = await catalogue.resolveOption(table, dimension, v);
-      if (!opt) {
+      const match = await catalogue.resolveOption(table, dimension, v);
+      if (match.kind === "ambiguous") {
+        return {
+          ok: false,
+          error: {
+            table,
+            dimension,
+            given: v,
+            reason: "ambiguous_option",
+            message:
+              `"${v}" matches ${match.candidates.length} options of ${table}.${dimension}; ` +
+              `pass the code of the one you mean. See validOptions.`,
+            validOptions: match.candidates,
+            validOptionsTotal: match.candidates.length,
+          },
+        };
+      }
+      if (match.kind === "none") {
         const { options, total } = await catalogue.options(table, dimension, { query: v, limit: VALID_OPTIONS_CAP });
         const fallback = options.length > 0 ? options : (await catalogue.options(table, dimension, { limit: VALID_OPTIONS_CAP })).options;
         return {
@@ -84,7 +100,7 @@ export async function resolveSelection(
           },
         };
       }
-      resolved.push(opt.code);
+      resolved.push(match.option.code);
     }
     codes.set(dimension, resolved);
   }
@@ -103,22 +119,39 @@ export async function resolveSelection(
       return { dim, availability: await checkAvailability(table, buildKey(order, relaxed)) };
     }),
   );
-  const culprit = relaxations.find((r) => r.availability.exists);
+  // Every single relaxation that recovers data is reported: the first is the
+  // headline, the rest are alternatives. "Melbourne rents quarterly" fails
+  // because quarterly rents exist only for the national aggregate — but monthly
+  // rents exist for Melbourne. Both routes out are worth knowing.
+  const recovering = relaxations.filter((r) => r.availability.exists);
+  const culprit = recovering[0];
   if (culprit) {
-    const validCodes = culprit.availability.available[culprit.dim] ?? [];
-    const labelled = await labelCodes(catalogue, table, culprit.dim, validCodes.slice(0, VALID_OPTIONS_CAP));
+    const describe = async (r: (typeof recovering)[number]) => {
+      const validCodes = r.availability.available[r.dim] ?? [];
+      return {
+        dimension: r.dim,
+        validOptions: await labelCodes(catalogue, table, r.dim, validCodes.slice(0, VALID_OPTIONS_CAP)),
+        validOptionsTotal: validCodes.length,
+      };
+    };
+    const primary = await describe(culprit);
+    const alternatives = await Promise.all(recovering.slice(1).map(describe));
+    const summary = [primary, ...alternatives]
+      .map((a) => `${a.dimension} (${a.validOptionsTotal} valid)`)
+      .join(", ");
     return {
       ok: false,
       error: {
         table,
-        dimension: culprit.dim,
-        given: codes.get(culprit.dim) ?? null,
+        dimension: primary.dimension,
+        given: codes.get(primary.dimension) ?? null,
         reason: "no_data_for_combination",
         message:
-          `No data for that combination. Given your other choices, ${culprit.dim} ` +
-          `has ${validCodes.length} valid option(s); see validOptions.`,
-        validOptions: labelled,
-        validOptionsTotal: validCodes.length,
+          `No data for that combination. Loosening any one of these recovers data: ${summary}. ` +
+          `validOptions shows what ${primary.dimension} could be given your other choices; alternatives cover the rest.`,
+        validOptions: primary.validOptions,
+        validOptionsTotal: primary.validOptionsTotal,
+        ...(alternatives.length > 0 ? { alternatives } : {}),
       },
     };
   }

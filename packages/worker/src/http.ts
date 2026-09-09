@@ -3,7 +3,7 @@
  * contract in @abs/contract, with the corrected OpenAPI document and a Scalar
  * reference served from the same definitions (decision 27).
  */
-import { implement } from "@orpc/server";
+import { ORPCError, implement, onError } from "@orpc/server";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { ZodToJsonSchemaConverter, experimental_ZodSmartCoercionPlugin } from "@orpc/zod/zod4";
@@ -65,6 +65,15 @@ export const OPENAPI_INFO = {
 };
 
 export const httpHandler = new OpenAPIHandler(router, {
+  // Unexpected handler failures must be visible in the Worker logs, not folded
+  // silently into a bare 500. Typed contract errors (422 INVALID_SELECTION, 404)
+  // are normal answers, not incidents — leave them out.
+  interceptors: [
+    onError((error) => {
+      if (error instanceof ORPCError && error.status < 500) return;
+      console.error("http door error:", error instanceof Error ? error.stack ?? error.message : String(error));
+    }),
+  ],
   plugins: [
     // Query strings arrive as text; coerce "limit=3" to the schema's number so
     // GET /api/tables?limit=3 validates instead of 400ing.

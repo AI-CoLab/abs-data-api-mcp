@@ -62,6 +62,10 @@ ABS_MCP_URL=http://localhost:8787/mcp npx tsx test/protocol.ts                  
 The probe is resumable: rerunning skips flows already recorded as complete. For
 the largest census flows run with `NODE_OPTIONS=--max-old-space-size=20480`.
 
+Gotcha: wrangler keys the *local* D1 state by `database_id`. Changing the id in
+`wrangler.toml` (e.g. after `d1 create`) gives `wrangler dev` a fresh, empty
+local database — re-run the local import.
+
 ## Principles
 
 - **Observed-only.** Declared metadata steers the crawler and feeds the defect
