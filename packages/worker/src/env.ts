@@ -3,6 +3,10 @@ export interface Env {
   RAW_ARCHIVE: R2Bucket;
   /** Worker Loader (Dynamic Workers, open beta). Absent when the account lacks it. */
   LOADER?: WorkerLoader;
+  /** Rate Limiting bindings, one per tier (limits.ts). Absent = unlimited (local dev). */
+  READS?: RateLimit;
+  UPSTREAM?: RateLimit;
+  EXECUTE?: RateLimit;
 }
 
 export const ABS_BASE = "https://data.api.abs.gov.au/rest";

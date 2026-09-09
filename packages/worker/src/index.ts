@@ -25,6 +25,7 @@ import { buildMcpServer } from "./mcp.ts";
 import { httpHandler } from "./http.ts";
 import { recentChecks, runRefreshCheck } from "./refresh.ts";
 import { handleRpc } from "./rpc.ts";
+import { classify, enforce, limitedResponse } from "./limits.ts";
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" } as const;
 
@@ -38,6 +39,12 @@ function json(body: unknown, status = 200, cacheSeconds = 300): Response {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    // Rate limits, once, for every door (decision 22): by what the request will
+    // cost — a catalogue read, an upstream ABS call, or a sandboxed execute.
+    const classified = await classify(request, url);
+    const exceeded = await enforce(env, request, classified.tiers);
+    if (exceeded) return limitedResponse(exceeded, classified);
 
     if (url.pathname === "/mcp") {
       // The SDK's own Web-standard handler (it ships a workerd provider): one

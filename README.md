@@ -64,7 +64,12 @@ npx wrangler d1 execute abs-catalogue --local --file=../../data/d1/00-schema.sql
 npx wrangler dev
 ABS_MCP_URL=http://localhost:8787/mcp npx tsx test/protocol.ts                     # ~50 checks, all doors
 pnpm --filter @abs/sdk example                                                     # the SDK against production
+ABS_URL=http://localhost:8787 npx tsx test/limits.ts                               # rate limits (spends a minute's budget)
 ```
+
+Rate limits, per client address: 600 requests/min overall; 120/min for data
+pulls (each is a live ABS call); 20/min for Code Mode `execute`. Over the limit,
+HTTP doors answer 429 with `Retry-After`; an MCP tool call gets a tool error.
 
 Using the SDK from TypeScript:
 

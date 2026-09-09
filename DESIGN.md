@@ -498,6 +498,14 @@ hundreds-of-GB path deferred in decision 1. Revisit when the rest works.
     (strangers running compute on our account) and is the primary reason a
     limiter is required at the end. Per-execution budgets (wall-clock, CPU,
     subrequests, output size) apply from the day that tool ships regardless.
+    **Implemented 2026-09-09** (`limits.ts`): Workers Rate Limiting bindings,
+    keyed by client IP, enforced once at the edge by classifying each request's
+    *cost* rather than per door — READS 600/min (everything), UPSTREAM 120/min
+    (get_data, getData, /api/data: each is a live ABS call), EXECUTE 20/min
+    (one execute may make 50 upstream calls). MCP tools/call over the limit is
+    answered as a tool error the model can read and act on; every other door
+    gets 429 + Retry-After. Missing bindings (local dev) mean unlimited, never
+    failure. Verified locally and live with `test/limits.ts`.
 23. **Repo layout: pnpm workspace, four packages.**
     - `packages/schema` — Drizzle + Zod, the shared source of truth
     - `packages/crawler` — structural crawl and observed probe
@@ -634,7 +642,11 @@ Done (2026-09-08 → 09):
     hold, all but three geographic; 127 were divisor coincidences. Headline
     corrected from 96.4% to **81.0%** of series explained (2.11).
 
-Remaining, in order:
+16. ✔ Rate limiting, last as agreed (decision 22): three cost tiers per client
+    IP at the edge; `test/limits.ts` trips UPSTREAM at request 121, MCP answers
+    a readable tool error, catalogue reads keep flowing.
 
-16. Rate limiting, last (decision 22) — with `execute` as the primary reason.
-17. Exposure decisions when ready: repo public, ABS report, registry listing.
+Remaining:
+
+17. Exposure decisions when ready (the user's call): repo public, ABS report,
+    registry listing. Everything functional is shipped.

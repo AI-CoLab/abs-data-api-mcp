@@ -61,7 +61,8 @@ export const OPENAPI_INFO = {
     "The Australian Bureau of Statistics Data API as it actually behaves, generated from an empirical crawl " +
     `of every dataflow (${MANIFEST.corpus.seriesConfirmed.toLocaleString("en-AU")} series confirmed across ` +
     `${MANIFEST.corpus.tables} tables, observed ${MANIFEST.observedAt}). Every option offered exists in real data; ` +
-    "every selection is verified live before data is fetched.",
+    "every selection is verified live before data is fetched. Rate limits per client address: 600 requests/min " +
+    "overall, 120/min for /data (each is a live ABS call); exceeding one answers 429 with Retry-After.",
 };
 
 export const httpHandler = new OpenAPIHandler(router, {

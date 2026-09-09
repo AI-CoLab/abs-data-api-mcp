@@ -23,6 +23,23 @@ bucket_name = "abs-raw-archive"
 [[worker_loaders]]
 binding = "LOADER"
 
+# Rate limits (decision 22), per client IP, enforced once at the edge by request
+# cost — see src/limits.ts. Keep LIMITS there in step with these numbers.
+[[ratelimits]]
+name = "READS"
+namespace_id = "1001"
+simple = { limit = 600, period = 60 }
+
+[[ratelimits]]
+name = "UPSTREAM"
+namespace_id = "1002"
+simple = { limit = 120, period = 60 }
+
+[[ratelimits]]
+name = "EXECUTE"
+namespace_id = "1003"
+simple = { limit = 20, period = 60 }
+
 # Daily refresh check on a rotating seventh of the flows (full sweep weekly):
 # dataflow listing diff plus live-vs-observed marginals. 20:00 UTC = 06:00 AEST.
 [triggers]
