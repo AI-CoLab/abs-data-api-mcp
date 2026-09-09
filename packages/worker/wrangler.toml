@@ -23,6 +23,11 @@ bucket_name = "abs-raw-archive"
 [[worker_loaders]]
 binding = "LOADER"
 
+# Daily refresh check on a rotating seventh of the flows (full sweep weekly):
+# dataflow listing diff plus live-vs-observed marginals. 20:00 UTC = 06:00 AEST.
+[triggers]
+crons = ["0 20 * * *"]
+
 [observability]
 enabled = true
 

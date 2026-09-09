@@ -22,6 +22,7 @@ import cataloguePage from "../../../artifact/abs-cartography.html";
 export { AbsToolsEntrypoint } from "./codemode.ts";
 import { buildMcpServer } from "./mcp.ts";
 import { httpHandler } from "./http.ts";
+import { recentChecks, runRefreshCheck } from "./refresh.ts";
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" } as const;
 
@@ -52,6 +53,33 @@ export default {
     // isolate. Large dimensions list their codelist and size; their options are
     // reached through search_options. Cached for a day: it changes per crawl.
     // Must precede the generic /api branch, which would otherwise claim it.
+    // Freshness: what the daily checks found. Empty until the first cron run.
+    // Precedes the generic /api branch, which would otherwise claim it.
+    if (url.pathname === "/api/status") {
+      const checks = await recentChecks(env);
+      const latest = checks[0];
+      return json(
+        {
+          catalogue: { runId: MANIFEST.runId, observedAt: MANIFEST.observedAt },
+          refresh: latest
+            ? {
+                lastCheckedAt: latest.checkedAt,
+                status: latest.status,
+                slice: `${latest.slice + 1}/${latest.slices}`,
+                newFlows: latest.newFlows,
+                removedFlows: latest.removedFlows,
+                reversionedFlows: latest.reversionedFlows,
+                marginalChanges: latest.marginalChanges,
+                errors: latest.errors,
+              }
+            : null,
+          recent: checks.map((c) => ({ checkedAt: c.checkedAt, status: c.status, slice: c.slice, flowsChecked: c.flowsChecked, changes: (c.marginalChanges as unknown[]).length })),
+        },
+        200,
+        300,
+      );
+    }
+
     if (url.pathname === "/api/catalogue.json") {
       const literal: Record<string, unknown> = {};
       for (const id of LITERAL_CODELISTS) {
@@ -115,5 +143,14 @@ export default {
     }
 
     return json({ error: "not found" }, 404, 0);
+  },
+
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(
+      runRefreshCheck(env, { now: new Date(controller.scheduledTime) }).then(
+        (s) => console.log(`refresh check ${s.id}: ${s.status}; slice ${s.slice + 1}/${s.slices}, ${s.flowsChecked} flows, ${s.marginalChanges.length} marginal changes, ${s.newFlows.length} new, ${s.removedFlows.length} removed, ${s.errors.length} errors, ${s.durationMs}ms`),
+        (err) => console.error(`refresh check failed: ${err instanceof Error ? err.stack ?? err.message : String(err)}`),
+      ),
+    );
   },
 } satisfies ExportedHandler<Env>;

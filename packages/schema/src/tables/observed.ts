@@ -202,6 +202,38 @@ export const observedDimensionCode = sqliteTable(
 );
 
 /**
+ * Weekly refresh checks (decision 28), run daily on a rotating slice of flows
+ * from the Worker. Each run diffs the live dataflow listing against
+ * declared_flow and compares the live availableconstraint marginals with the
+ * observed ones for its slice — which section 2.10 showed should agree exactly,
+ * so any divergence means ABS changed something and the flow needs re-probing.
+ */
+export const refreshCheck = sqliteTable(
+  "refresh_check",
+  {
+    id: text("id").primaryKey(),
+    checkedAt: text("checked_at").notNull(),
+    /** Which of the rotating slices this run covered (0..slices-1). */
+    slice: integer("slice").notNull(),
+    slices: integer("slices").notNull(),
+    flowsListed: integer("flows_listed").notNull(),
+    flowsChecked: integer("flows_checked").notNull(),
+    /** JSON arrays of flow ids. */
+    newFlows: text("new_flows", { mode: "json" }).notNull(),
+    removedFlows: text("removed_flows", { mode: "json" }).notNull(),
+    reversionedFlows: text("reversioned_flows", { mode: "json" }).notNull(),
+    /** JSON: [{ flow, dimension, observed, live }] where live marginals differ. */
+    marginalChanges: text("marginal_changes", { mode: "json" }).notNull(),
+    /** JSON: flows whose live check failed (upstream error), for retry. */
+    errors: text("errors", { mode: "json" }).notNull(),
+    durationMs: integer("duration_ms").notNull(),
+    /** "clean" | "changes" | "errors". */
+    status: text("status").notNull(),
+  },
+  (t) => [index("refresh_check_time_idx").on(t.checkedAt)],
+);
+
+/**
  * Census factorisation (DESIGN.md decision 4). ~558 of 1,227 flows are the same
  * tables replicated across nine geography levels, so the catalogue presents
  * "G01 x 9 geographies" rather than 558 unrelated rows. Every member is still
