@@ -5,6 +5,8 @@ This project measured what it actually serves — every dataflow, by retrieval �
 and exposes the result as a typed front door: an MCP server and an HTTP API
 that only ever offer what exists.
 
+![The ABS Data API cartography: unmasking the 4.21% reality — a comic-style map of the findings and the front door](docs/cartography-comic.png)
+
 | | |
 |---|---|
 | Front door | <https://abs-data-front-door.aicolab.workers.dev> |
